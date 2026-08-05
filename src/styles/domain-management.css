@@ -1,0 +1,358 @@
+.domain-management-card {
+  grid-column: 1 / -1;
+}
+
+.domain-add-form {
+  display: grid;
+  gap: 7px;
+  margin-top: 17px;
+}
+
+.domain-add-form > label {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.domain-add-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+}
+
+.domain-add-input {
+  display: grid;
+  min-height: 46px;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  padding: 4px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--surface-muted);
+  color: var(--text-tertiary);
+}
+
+.domain-add-input:focus-within {
+  border-color: var(--text-tertiary);
+  background: var(--surface);
+}
+
+.domain-add-row > .button {
+  min-height: 46px;
+  padding-inline: 18px;
+  white-space: nowrap;
+}
+
+.domain-add-form input {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+}
+
+.domain-add-form input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.managed-domain-list {
+  display: grid;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.managed-domain-row {
+  display: grid;
+  min-height: 62px;
+  grid-template-columns: auto minmax(150px, 1fr) auto auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 9px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.managed-domain-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+
+.managed-domain-identity {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.managed-domain-identity strong,
+.managed-domain-identity small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.managed-domain-identity strong {
+  font-size: 14px;
+}
+
+.managed-domain-identity small {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.domain-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.domain-state > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.domain-state.is-active {
+  color: var(--success);
+}
+
+.domain-delete {
+  border-color: color-mix(in srgb, var(--danger) 22%, var(--line));
+  color: var(--danger);
+}
+
+.domain-delete:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--danger) 38%, var(--line));
+  background: var(--danger-soft);
+}
+
+.domain-routing-note {
+  margin-top: 14px;
+}
+
+.domain-toast {
+  position: fixed;
+  z-index: 115;
+  right: 24px;
+  bottom: 24px;
+  display: grid;
+  min-width: min(340px, calc(100vw - 28px));
+  max-width: 440px;
+  min-height: 58px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+  text-align: left;
+}
+
+.domain-toast > svg:first-child {
+  color: var(--success);
+}
+
+.domain-toast.is-error > svg:first-child {
+  color: var(--danger);
+}
+
+.domain-toast > svg:last-child {
+  color: var(--text-tertiary);
+}
+
+.domain-toast > span {
+  display: grid;
+  gap: 2px;
+}
+
+.domain-toast strong {
+  font-size: 13px;
+}
+
+.domain-toast small {
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.domain-delete-backdrop {
+  position: fixed;
+  z-index: 120;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.48);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.domain-delete-dialog {
+  width: min(100%, 540px);
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.domain-delete-dialog > header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 21px 17px;
+  border-bottom: 1px solid var(--line);
+}
+
+.domain-delete-dialog > header > span {
+  display: grid;
+  width: 43px;
+  height: 43px;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.domain-delete-dialog h3 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.025em;
+}
+
+.domain-delete-lead {
+  margin: 0;
+  padding: 18px 21px 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.domain-delete-risks {
+  display: grid;
+  gap: 8px;
+  padding: 8px 21px 20px;
+}
+
+.domain-delete-risks > p {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.domain-delete-risks > p > svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--text-tertiary);
+}
+
+.domain-delete-risks > p > span {
+  display: grid;
+  gap: 2px;
+}
+
+.domain-delete-risks strong {
+  font-size: 13px;
+}
+
+.domain-delete-risks small {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.domain-delete-dialog > footer {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 9px;
+  padding: 15px 21px 20px;
+  border-top: 1px solid var(--line);
+}
+
+.domain-delete-dialog > footer .button {
+  justify-content: center;
+}
+
+.domain-delete-confirm {
+  background: var(--danger);
+  color: #fff;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--danger) 18%, transparent);
+}
+
+.domain-delete-confirm:hover:not(:disabled) {
+  box-shadow: 0 11px 26px color-mix(in srgb, var(--danger) 28%, transparent);
+}
+
+@media (max-width: 620px) {
+  .managed-domain-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .domain-state {
+    justify-self: end;
+  }
+
+  .managed-domain-row > .button {
+    grid-column: 2;
+    width: 100%;
+  }
+
+  .managed-domain-row > .domain-delete {
+    grid-column: 3;
+    grid-row: 2;
+  }
+
+  .domain-toast {
+    right: 14px;
+    bottom: 82px;
+  }
+}
+
+@media (max-width: 440px) {
+  .domain-add-row {
+    grid-template-columns: 1fr;
+  }
+
+  .domain-add-row > .button {
+    width: 100%;
+  }
+
+  .domain-delete-backdrop {
+    align-items: end;
+    padding: 0;
+  }
+
+  .domain-delete-dialog {
+    width: 100%;
+    max-height: 92dvh;
+    overflow-y: auto;
+    border-radius: 22px 22px 0 0;
+  }
+}

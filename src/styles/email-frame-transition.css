@@ -1,0 +1,42 @@
+.email-frame-stack {
+  position: relative;
+  width: 100%;
+  max-width: 920px;
+  min-height: 470px;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  transition: height 180ms ease;
+}
+
+.email-frame-stack .email-frame--buffer {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  max-width: none;
+  margin: 0;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.email-frame-stack .email-frame--buffer.is-active {
+  z-index: 2;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.email-frame-stack .email-frame--buffer.is-retiring {
+  z-index: 1;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .email-frame-stack,
+  .email-frame-stack .email-frame--buffer {
+    transition: none;
+  }
+}

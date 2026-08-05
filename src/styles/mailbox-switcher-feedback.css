@@ -1,0 +1,59 @@
+.switcher-feedback {
+  position: absolute;
+  z-index: 3;
+  right: 14px;
+  bottom: 14px;
+  left: 14px;
+  width: fit-content;
+  max-width: calc(100% - 28px);
+  margin: 0 auto;
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--success) 24%, var(--line));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 88%, var(--success-soft));
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+  color: var(--success);
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+  animation:
+    switcher-feedback-in 180ms ease-out both,
+    switcher-feedback-out 160ms ease-in 3.2s forwards;
+}
+
+.switcher-feedback.is-above-footer {
+  bottom: 72px;
+}
+
+.switcher-feedback.is-error {
+  border-color: color-mix(in srgb, var(--danger) 24%, var(--line));
+  background: color-mix(in srgb, var(--surface) 88%, var(--danger-soft));
+  color: var(--danger);
+  animation: switcher-feedback-in 180ms ease-out both;
+}
+
+@keyframes switcher-feedback-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes switcher-feedback-out {
+  to {
+    opacity: 0;
+    transform: translateY(4px);
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switcher-feedback {
+    animation: switcher-feedback-out 1ms linear 3.2s forwards;
+  }
+
+  .switcher-feedback.is-error {
+    animation: none;
+  }
+}

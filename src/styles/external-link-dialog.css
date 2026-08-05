@@ -1,0 +1,200 @@
+.external-link-backdrop {
+  position: fixed;
+  z-index: 160;
+  inset: 0;
+  display: grid;
+  padding: 20px;
+  overflow-y: auto;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: external-link-backdrop-in 180ms ease both;
+}
+
+.external-link-dialog {
+  width: min(100%, 540px);
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  animation: external-link-dialog-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.external-link-dialog > header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  padding: 20px 21px 17px;
+  border-bottom: 1px solid var(--line);
+}
+
+.external-link-dialog h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.external-link-dialog .eyebrow {
+  margin-bottom: 2px;
+}
+
+.external-link-dialog__symbol {
+  display: grid;
+  width: 43px;
+  height: 43px;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.external-link-dialog__body {
+  padding: 19px 21px 5px;
+}
+
+.external-link-dialog__body > p:first-child {
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.external-link-dialog dl {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.external-link-dialog dl > div {
+  display: grid;
+  gap: 6px;
+}
+
+.external-link-dialog dt {
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.external-link-dialog dd {
+  margin: 0;
+}
+
+.external-link-dialog dl > div:first-child dd {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+}
+
+.external-link-url {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 9px 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface-muted);
+}
+
+.external-link-url code {
+  max-height: 70px;
+  overflow: auto;
+  color: var(--text-secondary);
+  font: 11px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+.external-link-url button {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.external-link-url button:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.external-link-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 10px 11px;
+  border: 1px solid color-mix(in srgb, var(--warning) 24%, var(--line));
+  border-radius: 11px;
+  background: var(--warning-soft);
+  color: var(--warning);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.external-link-warning svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.external-link-copy-status {
+  min-height: 18px;
+  margin: 4px 0 0;
+  color: var(--danger);
+  font-size: 10px;
+}
+
+.external-link-copy-status--success {
+  color: var(--success);
+}
+
+.external-link-dialog > footer {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 9px;
+  padding: 7px 21px 21px;
+}
+
+@keyframes external-link-backdrop-in {
+  from { opacity: 0; }
+}
+
+@keyframes external-link-dialog-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+}
+
+@media (max-width: 520px) {
+  .external-link-backdrop {
+    padding: 12px;
+  }
+
+  .external-link-dialog > header,
+  .external-link-dialog__body {
+    padding-inline: 16px;
+  }
+
+  .external-link-url {
+    grid-template-columns: 1fr;
+  }
+
+  .external-link-url button {
+    justify-content: center;
+  }
+
+  .external-link-dialog > footer {
+    padding-inline: 16px;
+  }
+}

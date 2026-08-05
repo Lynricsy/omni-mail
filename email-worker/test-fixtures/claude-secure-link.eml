@@ -1,0 +1,21 @@
+From: Anthropic <no-reply@mail.anthropic.com>
+To: inbox@example.com
+Subject: Secure link to log in to Claude.ai
+Date: Tue, 28 Jul 2026 09:18:54 +0800
+Message-ID: <claude-login-1@mail.anthropic.com>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="claude-boundary"
+
+--claude-boundary
+Content-Type: text/plain; charset=UTF-8
+
+Sign in to Claude.ai: https://claude.ai/login?token=fixture
+--claude-boundary
+Content-Type: text/html; charset=UTF-8
+
+<!doctype html><html><body>
+<img src="https://claude.ai/images/claude_logo_full.png" alt="Claude">
+<h1>Let's get you signed in</h1>
+<a href="https://claude.ai/login?token=fixture">Sign in to Claude.ai</a>
+</body></html>
+--claude-boundary--

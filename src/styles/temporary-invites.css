@@ -1,0 +1,506 @@
+.invite-summary {
+  display: grid;
+  width: var(--admin-content-width);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 auto 14px;
+}
+
+.invite-summary > div {
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.invite-summary > div > svg {
+  color: var(--text-tertiary);
+}
+
+.invite-summary span {
+  display: grid;
+  gap: 2px;
+}
+
+.invite-summary strong {
+  font-size: 21px;
+  letter-spacing: -0.035em;
+}
+
+.invite-summary small {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.invite-workspace {
+  width: var(--admin-content-width);
+  display: grid;
+  gap: 14px;
+  margin-inline: auto;
+}
+
+.invite-workspace > .user-panel-error {
+  margin: 0;
+}
+
+.invite-loading {
+  display: flex;
+  min-height: 120px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.invite-empty {
+  display: flex;
+  min-height: 120px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.invite-form {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.invite-form-section {
+  display: grid;
+  align-content: start;
+  gap: 17px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface-muted);
+}
+
+.invite-form-section__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--line);
+}
+
+.invite-form-section__header > span {
+  display: grid;
+  width: 35px;
+  height: 35px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+
+.invite-form-section__header h2 {
+  margin: 0 0 3px;
+  font-size: 15px;
+}
+
+.invite-form-section__header p {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.invite-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.invite-field,
+.invite-limit {
+  display: grid;
+  gap: 7px;
+}
+
+.invite-field > span,
+.invite-limit > span,
+.invite-mode legend {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.invite-select > button,
+.invite-limit input {
+  width: 100%;
+  min-height: 42px;
+  padding-inline: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  outline: 0;
+  background: var(--surface-muted);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.invite-select > button:focus-visible,
+.invite-limit input:focus {
+  border-color: var(--text-tertiary);
+  background: var(--surface);
+}
+
+.invite-select {
+  position: relative;
+}
+
+.invite-select > button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  text-align: left;
+}
+
+.invite-select > button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.invite-select > button > svg {
+  flex: 0 0 auto;
+  color: var(--text-tertiary);
+  transition: transform 160ms ease;
+}
+
+.invite-select.is-open > button {
+  border-color: var(--text-tertiary);
+  background: var(--surface);
+}
+
+.invite-select.is-open > button > svg {
+  transform: rotate(180deg);
+}
+
+.invite-select__menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  display: grid;
+  gap: 3px;
+  max-height: 230px;
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.invite-select__menu > button {
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 13px;
+  text-align: left;
+}
+
+.invite-select__menu > button:hover,
+.invite-select__menu > button.is-selected {
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.invite-select__menu > button > svg {
+  color: var(--success);
+}
+
+.invite-field > small,
+.invite-limit small {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+@media (min-width: 761px) {
+  .invite-form-grid .invite-field > small {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.invite-mode {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.invite-mode--single {
+  grid-template-columns: 1fr;
+}
+
+.invite-mode legend {
+  grid-column: 1 / -1;
+  margin-bottom: 7px;
+}
+
+.invite-mode label {
+  display: flex;
+  min-height: 78px;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.invite-mode label.is-selected {
+  border-color: var(--line-strong);
+  background: var(--surface-muted);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+.invite-mode label.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.invite-mode label.is-disabled:hover {
+  border-color: var(--line);
+}
+
+.invite-mode input {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  margin: 2px 0 0;
+  accent-color: var(--accent);
+}
+
+.invite-mode label > span {
+  display: grid;
+  gap: 3px;
+}
+
+.invite-mode strong {
+  font-size: 13px;
+}
+
+.invite-mode small {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.invite-permissions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 112px;
+  gap: 10px;
+}
+
+.invite-admin-address {
+  display: grid;
+  gap: 7px;
+}
+
+.invite-admin-address > span:first-child {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.invite-admin-address > span:nth-child(2) {
+  display: grid;
+  grid-template-columns: auto minmax(90px, 1fr) auto;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface-muted);
+}
+
+.invite-admin-address > span:nth-child(2):focus-within {
+  border-color: var(--text-tertiary);
+  background: var(--surface);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.invite-admin-address svg {
+  margin-left: 12px;
+  color: var(--text-tertiary);
+}
+
+.invite-admin-address input {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding-inline: 8px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.invite-admin-address strong {
+  padding-right: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.invite-admin-address > small {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.invite-permissions .policy-toggle:last-child {
+  grid-column: 1 / -1;
+}
+
+.invite-limit {
+  align-content: center;
+}
+
+.invite-limit input:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.invite-form-footer {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 2px 2px 0;
+}
+
+.invite-form-footer > div {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 9px;
+  color: var(--text-secondary);
+}
+
+.invite-form-footer > div > svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.invite-form-footer > div > span {
+  display: grid;
+  gap: 2px;
+}
+
+.invite-form-footer strong {
+  font-size: 12px;
+}
+
+.invite-form-footer small {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.invite-create-button {
+  width: auto;
+  min-width: 240px;
+  min-height: 44px;
+}
+
+.created-invite {
+  display: grid;
+  width: 100%;
+  gap: 11px;
+  margin: 0;
+  padding: 16px 18px;
+  border: 1px solid color-mix(in srgb, var(--success) 30%, var(--line));
+  border-radius: 13px;
+  background: var(--success-soft);
+}
+
+.created-invite > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  color: var(--success);
+}
+
+.created-invite > div > svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.created-invite > div > span {
+  display: grid;
+  gap: 2px;
+}
+
+.created-invite strong {
+  font-size: 13px;
+}
+
+.created-invite small {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.created-invite label {
+  display: flex;
+  gap: 8px;
+}
+
+.created-invite input {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding-inline: 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  outline: 0;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.created-invite input:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 7%, transparent);
+}
+
+.created-invite .button {
+  min-width: 86px;
+  flex: 0 0 auto;
+  justify-content: center;
+  white-space: nowrap;
+}

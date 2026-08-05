@@ -1,0 +1,27 @@
+# Copy to .dev.vars for `npm run dev:worker`.
+SETUP_TOKEN=replace-with-a-long-random-value
+SUPER_ADMIN_EMAIL=owner@example.com
+TURNSTILE_SITE_KEY=1x00000000000000000000AA
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+APP_ORIGINS=http://localhost:5173
+COOKIE_SECURE=false
+APP_NAME=OmniMail
+
+# Optional. Register the callback URL /api/auth/linux-do/callback in Linux DO Connect.
+LINUX_DO_CLIENT_ID=
+LINUX_DO_CLIENT_SECRET=
+
+# Optional outbound providers. Existing Resend configuration remains supported.
+RESEND_API_KEY=
+RESEND_FROM=
+RESEND_DOMAIN_CONFIGS={"example.com":{"apiKey":"re_example"}}
+RESEND_WEBHOOK_SECRET=
+
+# A matching SendFlare domain entry takes precedence over Resend for that domain.
+# SENDFLARE_FROM must be a verified sender email address, without a display name.
+SENDFLARE_API_KEY=
+SENDFLARE_FROM=
+SENDFLARE_DOMAIN_CONFIGS={"sendflare.example":{"apiKey":"sf_example","from":"mail@sendflare.example"}}
+
+# At least 32 random characters. Encrypts administrator TOTP secrets in D1.
+TOTP_ENCRYPTION_KEY=

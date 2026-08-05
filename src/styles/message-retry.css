@@ -1,0 +1,52 @@
+.message-notice > svg {
+  flex: 0 0 auto;
+}
+
+.message-notice__copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.message-notice__action {
+  display: inline-flex;
+  min-height: 30px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 0 11px;
+  border: 1px solid color-mix(in srgb, currentColor 32%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 650;
+  white-space: nowrap;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.message-notice__action:hover:not(:disabled),
+.message-notice__action:focus-visible {
+  border-color: currentColor;
+  background: var(--surface);
+  outline: none;
+}
+
+.message-notice__action:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+@media (max-width: 520px) {
+  .message-notice {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .message-notice__action {
+    width: 100%;
+    margin: 4px 0 0;
+  }
+}

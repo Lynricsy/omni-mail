@@ -1,0 +1,163 @@
+.page-loader {
+  position: relative;
+  display: grid;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  place-items: center;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 44%, color-mix(in srgb, var(--text) 7%, transparent), transparent 19rem),
+    var(--background);
+}
+
+.page-loader::before {
+  position: absolute;
+  width: min(62vw, 720px);
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--text) 5%, transparent);
+  border-radius: 50%;
+  content: '';
+  transform: translateY(-2%);
+}
+
+.opening-splash {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+}
+
+.opening-splash__mark {
+  position: relative;
+  display: grid;
+  width: 78px;
+  height: 78px;
+  place-items: center;
+  border-radius: 24px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow:
+    0 20px 54px color-mix(in srgb, var(--text) 18%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--accent-contrast) 12%, transparent);
+  animation: opening-mark-in 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.opening-splash__mark::before {
+  position: absolute;
+  inset: -11px;
+  border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
+  border-radius: 31px;
+  content: '';
+  animation: opening-ring-in 720ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
+}
+
+.opening-splash__mark svg * {
+  stroke-dasharray: 54;
+  stroke-dashoffset: 54;
+  animation: opening-icon-draw 620ms ease-out 160ms forwards;
+}
+
+.opening-splash__copy {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  margin-top: 26px;
+  animation: opening-copy-in 480ms ease-out 190ms both;
+}
+
+.opening-splash__copy strong {
+  color: var(--text);
+  font-size: 29px;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+}
+
+.opening-splash__copy small {
+  color: var(--text-tertiary);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.opening-splash__track {
+  position: relative;
+  width: 152px;
+  height: 2px;
+  margin-top: 28px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--line-strong);
+  animation: opening-copy-in 400ms ease-out 310ms both;
+}
+
+.opening-splash__track > span {
+  position: absolute;
+  inset-block: 0;
+  width: 42%;
+  border-radius: inherit;
+  background: var(--text);
+  animation: opening-progress 1.15s cubic-bezier(0.65, 0, 0.35, 1) 330ms infinite;
+}
+
+@keyframes opening-mark-in {
+  from {
+    opacity: 0;
+    border-radius: 39px;
+    transform: translateY(12px) scale(0.76) rotate(-5deg);
+  }
+}
+
+@keyframes opening-ring-in {
+  from { opacity: 0; transform: scale(0.72); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes opening-icon-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes opening-copy-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
+@keyframes opening-progress {
+  from { transform: translateX(-140%); }
+  to { transform: translateX(340%); }
+}
+
+@media (max-width: 520px) {
+  .page-loader::before {
+    width: 118vw;
+  }
+
+  .opening-splash__mark {
+    width: 70px;
+    height: 70px;
+    border-radius: 21px;
+  }
+
+  .opening-splash__copy strong {
+    font-size: 26px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opening-splash__mark,
+  .opening-splash__mark::before,
+  .opening-splash__mark svg *,
+  .opening-splash__copy,
+  .opening-splash__track,
+  .opening-splash__track > span {
+    animation: none;
+  }
+
+  .opening-splash__mark svg * {
+    stroke-dashoffset: 0;
+  }
+
+  .opening-splash__track > span {
+    width: 70%;
+    transform: none;
+  }
+}

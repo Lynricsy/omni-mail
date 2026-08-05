@@ -1,0 +1,23 @@
+From: "Alice Example" <alice@example.net>
+To: owner@example.com
+Subject: Welcome to OmniMail
+Date: Mon, 27 Jul 2026 10:00:00 +0800
+Message-ID: <omnimail-local-fixture@example.net>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="omnimail-boundary"
+
+--omnimail-boundary
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Hello from the OmniMail integration test.
+
+This message verifies the Cloudflare Email Worker, Queue, D1, and R2 path.
+
+--omnimail-boundary
+Content-Type: text/plain; name="hello.txt"
+Content-Disposition: attachment; filename="hello.txt"
+Content-Transfer-Encoding: base64
+
+SGVsbG8gZnJvbSBPbW5pTWFpbCEK
+--omnimail-boundary--

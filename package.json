@@ -1,0 +1,42 @@
+{
+  "name": "omni-mail",
+  "version": "0.1.3",
+  "private": true,
+  "type": "module",
+  "description": "A small, self-hosted webmail deployed as one Cloudflare Worker with Static Assets, D1, R2, Queues, and Resend.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "dev:worker": "wrangler dev --env-file email-worker/.dev.vars --persist-to .wrangler/state",
+    "check:lines": "node scripts/check-file-lines.mjs",
+    "check": "npm run check:lines && tsc --noEmit --pretty false && tsc -p email-worker/tsconfig.json --noEmit --pretty false",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "build": "npm run check && vite build"
+  },
+  "dependencies": {
+    "franc": "^6.2.0",
+    "hono": "4.12.32",
+    "lucide-react": "1.27.0",
+    "parse5": "^8.0.1",
+    "postal-mime": "2.7.5",
+    "qrcode": "^1.5.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20260727.1",
+    "@playwright/test": "^1.62.0",
+    "@types/node": "26.1.1",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.4",
+    "typescript": "7.0.2",
+    "vite": "8.1.5",
+    "vitest": "4.1.10",
+    "wrangler": "4.114.0"
+  }
+}

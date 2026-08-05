@@ -1,0 +1,45 @@
+export const user = {
+  id: 'user-1',
+  email: 'owner@example.com',
+  displayName: 'Owner',
+  role: 'super_admin',
+  mailboxLimit: 100,
+  storageQuotaBytes: 5 * 1024 ** 3,
+  storageUsedBytes: 2048,
+  canCreateMailboxes: true,
+  canReply: true,
+  canTranslate: true,
+  temporaryExpiresAt: null,
+}
+
+export const message = {
+  id: 'message-1',
+  mailboxAddress: 'inbox@example.com',
+  direction: 'incoming',
+  status: 'ready',
+  folder: 'inbox',
+  senderName: 'Example Sender',
+  senderAddress: 'sender@example.net',
+  recipients: ['inbox@example.com'],
+  subject: 'Welcome to OmniMail',
+  preview: 'Open the secure link.',
+  date: Date.now(),
+  attachmentCount: 0,
+  isRead: true,
+  isStarred: false,
+  processingError: null,
+  purgeAfter: null,
+}
+
+export const reply = {
+  ...message,
+  id: 'reply-1',
+  direction: 'outgoing',
+  status: 'sent',
+  folder: 'sent',
+  senderName: 'Owner',
+  senderAddress: 'inbox@example.com',
+  recipients: ['sender@example.net'],
+  preview: 'Thanks from OmniMail.',
+  date: message.date + 1000,
+}

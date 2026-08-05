@@ -1,0 +1,22 @@
+.reader-content.is-scrollbar-active {
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.reader-content::-webkit-scrollbar {
+  width: 12px;
+}
+
+.reader-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.reader-content::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  background-clip: padding-box;
+}
+
+.reader-content.is-scrollbar-active::-webkit-scrollbar-thumb {
+  background-color: var(--line-strong);
+}

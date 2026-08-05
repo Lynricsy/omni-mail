@@ -1,0 +1,136 @@
+.outbound-rate-card form {
+  display: grid;
+  gap: 13px;
+  margin-top: 13px;
+}
+
+.rate-limit-loading,
+.rate-limit-notice {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 14px 0 0;
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+.rate-limit-notice {
+  color: var(--success);
+}
+
+.rate-limit-inputs,
+.user-rate-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.rate-limit-inputs label,
+.user-rate-inputs label {
+  display: grid;
+  gap: 5px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.rate-limit-inputs input,
+.user-rate-inputs input {
+  width: 100%;
+  min-height: 39px;
+  padding-inline: 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  outline: 0;
+  background: var(--surface-muted);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.rate-limit-inputs input:focus,
+.user-rate-inputs input:focus {
+  border-color: var(--text-tertiary);
+  background: var(--surface);
+}
+
+.rate-limit-inputs small,
+.user-rate-inputs small {
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.rate-limit-save {
+  width: 100%;
+}
+
+.user-rate-limit {
+  display: grid;
+  gap: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.user-rate-limit > header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.user-rate-limit > header > svg {
+  color: var(--text-tertiary);
+}
+
+.user-rate-limit > header > span {
+  display: grid;
+  gap: 2px;
+}
+
+.user-rate-limit > header strong {
+  font-size: 13px;
+}
+
+.user-rate-limit > header small,
+.user-rate-usage small {
+  color: var(--text-tertiary);
+  font-size: 10px;
+}
+
+.user-rate-usage {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.user-rate-usage > span {
+  display: grid;
+  gap: 3px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-muted);
+}
+
+.user-rate-usage strong {
+  font-size: 15px;
+}
+
+.user-rate-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.user-rate-message {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+  text-align: center;
+}
+
+@media (max-width: 440px) {
+  .rate-limit-inputs,
+  .user-rate-inputs,
+  .user-rate-actions {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,386 @@
+.user-panel-backdrop {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.46);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.user-policy-backdrop {
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  transition: opacity 160ms ease-in;
+}
+
+.user-policy-backdrop.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transition-timing-function: ease-out;
+}
+
+.user-policy-backdrop .user-panel {
+  opacity: 0;
+  transform: translateY(8px) scale(0.992);
+  transition:
+    opacity 140ms ease-in,
+    transform 180ms ease-in;
+}
+
+.user-policy-backdrop.is-visible .user-panel {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 170ms ease-out,
+    transform 210ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.user-panel {
+  width: min(100%, 510px);
+  max-height: min(90vh, 760px);
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  border: 1px solid var(--line-strong);
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.user-panel::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.user-panel > header {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 21px 22px 17px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.user-panel h2 {
+  margin: 0 0 3px;
+  font-size: 24px;
+}
+
+.user-panel header p:last-child {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+.user-panel form {
+  padding: 20px 22px 24px;
+}
+
+.user-create-fields {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.user-create-fields label,
+.user-policy-fields > label:not(.policy-toggle) {
+  display: grid;
+  gap: 6px;
+}
+
+.user-create-fields label > span,
+.user-policy-fields > label:not(.policy-toggle) > span {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.user-create-fields input,
+.user-policy-fields input[type="number"] {
+  width: 100%;
+  min-height: 41px;
+  padding-inline: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  outline: 0;
+  background: var(--surface-muted);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.user-create-fields input:focus,
+.user-policy-fields input[type="number"]:focus {
+  border-color: var(--text-tertiary);
+  background: var(--surface);
+}
+
+.user-role-select {
+  position: relative;
+}
+
+.user-role-select__trigger {
+  display: grid;
+  width: 100%;
+  min-height: 43px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding-inline: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface-muted);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.user-role-select__trigger > svg {
+  color: var(--text-tertiary);
+}
+
+.user-role-select__trigger > svg:last-child {
+  transition: transform 160ms ease;
+}
+
+.user-role-select.is-open .user-role-select__trigger {
+  border-color: var(--text-tertiary);
+  background: var(--surface);
+}
+
+.user-role-select.is-open .user-role-select__trigger > svg:last-child {
+  transform: rotate(180deg);
+}
+
+.user-role-select__trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.user-role-select__menu {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  display: grid;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: 13px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.user-role-select__menu > button {
+  display: grid;
+  min-height: 52px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.user-role-select__menu > button:hover,
+.user-role-select__menu > button.is-selected {
+  background: var(--surface-muted);
+}
+
+.user-role-select__icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+
+.user-role-select__menu > button > span:nth-child(2) {
+  display: grid;
+  gap: 1px;
+}
+
+.user-role-select__menu strong {
+  font-size: 13px;
+}
+
+.user-role-select__menu small {
+  color: var(--text-tertiary);
+  font-size: 10px;
+}
+
+.user-role-select__menu > button > svg {
+  color: var(--success);
+}
+
+.user-policy-fields {
+  display: grid;
+  gap: 13px;
+}
+
+.user-policy-fields label > small {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.policy-toggle {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.policy-toggle > span {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.policy-toggle > span > svg {
+  flex: 0 0 auto;
+  color: var(--text-tertiary);
+}
+
+.policy-toggle > span > span {
+  display: grid;
+}
+
+.policy-toggle strong {
+  font-size: 13px;
+}
+
+.policy-toggle small {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.policy-toggle input {
+  width: 40px;
+  height: 24px;
+  flex: 0 0 auto;
+  margin: 0;
+  appearance: none;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 11px 50%, var(--text-tertiary) 0 7px, transparent 7.5px),
+    var(--surface-muted);
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.policy-toggle input:checked {
+  border-color: var(--success);
+  background:
+    radial-gradient(circle at 28px 50%, #fff 0 7px, transparent 7.5px),
+    var(--success);
+}
+
+.policy-toggle input:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.policy-toggle--danger input:checked {
+  border-color: var(--danger);
+  background:
+    radial-gradient(circle at 28px 50%, #fff 0 7px, transparent 7.5px),
+    var(--danger);
+}
+
+.user-panel-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.user-panel-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.user-protected-note,
+.user-panel-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border-radius: 11px;
+  font-size: 12px;
+}
+
+.user-protected-note {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.user-panel-error {
+  margin: 16px 22px 0;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.user-panel-submit {
+  width: 100%;
+  margin-top: 18px;
+}
+
+.user-notice {
+  position: fixed;
+  z-index: 110;
+  right: 24px;
+  bottom: 24px;
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .user-policy-backdrop,
+  .user-policy-backdrop .user-panel {
+    transition: none;
+  }
+}

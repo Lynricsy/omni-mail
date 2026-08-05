@@ -1,0 +1,68 @@
+.omni-tooltip {
+  position: fixed;
+  z-index: 260;
+  max-width: min(260px, calc(100vw - 20px));
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9px;
+  background: rgba(25, 25, 27, 0.92);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  color: #f8f8fa;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 150ms ease-in, transform 150ms ease-in;
+  backdrop-filter: blur(14px) saturate(130%);
+}
+
+.omni-tooltip[data-side="bottom"] {
+  transform: translateY(-3px);
+}
+
+.omni-tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition-duration: 160ms;
+  transition-timing-function: ease-out;
+}
+
+.omni-tooltip__arrow {
+  position: absolute;
+  bottom: -4px;
+  width: 8px;
+  height: 8px;
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(25, 25, 27, 0.92);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.omni-tooltip[data-side="bottom"] .omni-tooltip__arrow {
+  top: -4px;
+  bottom: auto;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+:root[data-theme="dark"] .omni-tooltip {
+  border-color: rgba(18, 18, 20, 0.14);
+  background: rgba(245, 245, 247, 0.93);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.42);
+  color: #171719;
+}
+
+:root[data-theme="dark"] .omni-tooltip__arrow {
+  border-color: rgba(18, 18, 20, 0.14);
+  background: rgba(245, 245, 247, 0.93);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .omni-tooltip {
+    transition: none;
+  }
+}

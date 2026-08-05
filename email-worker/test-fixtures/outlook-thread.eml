@@ -1,0 +1,22 @@
+From: Alex Example <alex@example.org>
+To: inbox@example.com
+Subject: =?UTF-8?Q?Re=3A_Project_update?=
+Date: Tue, 28 Jul 2026 11:00:00 +0800
+Message-ID: <outlook-reply-2@example.org>
+In-Reply-To: <outlook-root-1@example.org>
+References: <outlook-root-1@example.org>
+ <outlook-reply-1@example.org>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="outlook-boundary"
+
+--outlook-boundary
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+The project is ready.=0A=0ARegards,=0AAlex
+--outlook-boundary
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<html><body><p>The project is ready.</p><p>Regards,<br>Alex</p></body></html>
+--outlook-boundary--

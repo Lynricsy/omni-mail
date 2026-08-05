@@ -1,0 +1,52 @@
+.message-translation {
+  width: 100%;
+}
+
+.message-translation__controls {
+  display: flex;
+  width: 100%;
+  max-width: 920px;
+  min-height: 42px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin: 0 auto 12px;
+}
+
+.message-translation__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+.message-translation__error {
+  display: flex;
+  width: 100%;
+  max-width: 920px;
+  align-items: center;
+  gap: 7px;
+  margin: 0 auto 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 12px;
+}
+
+.message-translation__notice {
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto 12px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  text-align: right;
+}
+
+@media (max-width: 700px) {
+  .message-translation__controls {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+}

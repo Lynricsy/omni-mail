@@ -1,0 +1,35 @@
+.mailbox-address-item {
+  position: relative;
+  min-width: 0;
+}
+
+.mailbox-address-list .mailbox-address-option {
+  padding-right: 50px;
+}
+
+.mailbox-address-list .mailbox-address-copy {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  right: 7px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  grid-template-columns: 1fr;
+  place-items: center;
+  gap: 0;
+  padding: 0;
+  border-radius: 8px;
+  color: var(--text-tertiary);
+  transform: translateY(-50%);
+}
+
+.mailbox-address-option.is-selected + .mailbox-address-copy {
+  color: color-mix(in srgb, var(--accent-contrast) 72%, transparent);
+}
+
+.mailbox-address-option.is-selected + .mailbox-address-copy:hover {
+  background: color-mix(in srgb, var(--accent-contrast) 14%, transparent);
+  color: var(--accent-contrast);
+}

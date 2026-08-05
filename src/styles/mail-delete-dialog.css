@@ -1,0 +1,157 @@
+.mail-delete-backdrop {
+  position: fixed;
+  z-index: 170;
+  inset: 0;
+  display: grid;
+  padding: 20px;
+  overflow-y: auto;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+  animation: mail-delete-backdrop-in 180ms ease-out both;
+}
+
+.mail-delete-dialog {
+  width: min(100%, 500px);
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  animation: mail-delete-dialog-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.mail-delete-dialog > header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  padding: 20px 21px 17px;
+  border-bottom: 1px solid var(--line);
+}
+
+.mail-delete-dialog > header > span {
+  display: grid;
+  width: 43px;
+  height: 43px;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.mail-delete-dialog.is-permanent > header > span {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.mail-delete-dialog h2 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.mail-delete-dialog .eyebrow {
+  margin-bottom: 2px;
+}
+
+.mail-delete-dialog__body {
+  padding: 18px 21px 20px;
+}
+
+.mail-delete-dialog__body > p:first-child {
+  margin: 0 0 14px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.mail-delete-impact {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--warning) 24%, var(--line));
+  border-radius: 12px;
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.mail-delete-dialog.is-permanent .mail-delete-impact {
+  border-color: color-mix(in srgb, var(--danger) 24%, var(--line));
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.mail-delete-impact > svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.mail-delete-impact > span {
+  display: grid;
+  gap: 2px;
+}
+
+.mail-delete-impact strong {
+  font-size: 13px;
+}
+
+.mail-delete-impact small {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.mail-delete-dialog > footer {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 9px;
+  padding: 15px 21px 20px;
+  border-top: 1px solid var(--line);
+}
+
+.mail-delete-dialog > footer .button {
+  justify-content: center;
+}
+
+.mail-delete-confirm {
+  background: var(--text);
+  color: var(--surface);
+}
+
+.mail-delete-confirm.is-permanent {
+  background: var(--danger);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--danger) 18%, transparent);
+  color: #fff;
+}
+
+@keyframes mail-delete-backdrop-in {
+  from { opacity: 0; }
+}
+
+@keyframes mail-delete-dialog-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+}
+
+@media (max-width: 520px) {
+  .mail-delete-backdrop {
+    padding: 12px;
+  }
+
+  .mail-delete-dialog > header,
+  .mail-delete-dialog__body,
+  .mail-delete-dialog > footer {
+    padding-inline: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mail-delete-backdrop,
+  .mail-delete-dialog {
+    animation: none;
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "omni-mail",
+  "main": "./email-worker/src/index.ts",
+  "compatibility_date": "2026-07-27",
+  "compatibility_flags": ["nodejs_compat"],
+  "keep_vars": true,
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api", "/api/*"]
+  },
+  "ai": {
+    "binding": "AI"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB","database_id": "de8f09b6-a28b-48b5-b8d1-b45a6321bc1e","database_name": "omni-mail"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MAIL_BUCKET","bucket_name": "omni-mail","preview_bucket_name": "omni-mail"
+    },
+    {
+      "binding": "BACKUP_BUCKET",
+      "bucket_name": "omni-mail-backups","preview_bucket_name": "omni-mail-backups"
+    }
+  ],
+  "workflows": [
+    {
+      "name": "omni-mail-backup",
+      "binding": "BACKUP_WORKFLOW",
+      "class_name": "OmniMailBackupWorkflow"
+    },
+    {
+      "name": "omni-mail-cleanup",
+      "binding": "CLEANUP_WORKFLOW",
+      "class_name": "OmniMailCleanupWorkflow"
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "MAIL_QUEUE",
+        "queue": "omnimail-mail"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "omnimail-mail",
+        "max_batch_size": 1,
+        "max_batch_timeout": 2,
+        "max_retries": 3,
+        "dead_letter_queue": "omnimail-mail-dead"
+      }
+    ]
+  },
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  },
+  "observability": {
+    "enabled": true
+  }
+}

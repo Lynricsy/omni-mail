@@ -1,0 +1,20 @@
+From: Receipt Robot <receipt@example.net>
+To: inbox@example.com
+Subject: Your receipt
+Date: Tue, 28 Jul 2026 10:00:00 +0800
+Message-ID: <receipt-1@example.net>
+MIME-Version: 1.0
+Content-Type: multipart/related; boundary="related-boundary"
+
+--related-boundary
+Content-Type: text/html; charset=UTF-8
+
+<!doctype html><html><body><p>Thanks for your order.</p><img src="cid:brand-logo@example.net" alt="Brand"></body></html>
+--related-boundary
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+Content-ID: <brand-logo@example.net>
+Content-Disposition: inline; filename="logo.png"
+
+iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+--related-boundary--
