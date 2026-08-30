@@ -52,6 +52,13 @@ export interface YandexMailSyncJob {
   reason: 'connect' | 'manual' | 'scheduled'
 }
 
+export interface ExternalMailSyncJob {
+  kind: 'icloud-sync' | 'linuxdo-mail-sync'
+  accountId: string
+  reason: 'scheduled'
+  limit?: MailSyncLimit
+}
+
 export type MailQueueJob =
   | ParseJob
   | OutboundJob
@@ -61,6 +68,7 @@ export type MailQueueJob =
   | QqMailSyncJob
   | NaverMailSyncJob
   | YandexMailSyncJob
+  | ExternalMailSyncJob
 
 export interface BackupWorkflowParams {
   trigger?: 'scheduled' | 'manual' | 'enable'

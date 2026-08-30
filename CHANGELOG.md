@@ -5,6 +5,33 @@
 后续 Web、OmniMail Float 与 Android 分别使用 `vX.Y.Z`、`float-vX.Y.Z` 和
 `android-vX.Y.Z`，三套版本号互不影响；以下既有历史记录保持不变。
 
+## [0.10.4] - 2026-08-30
+
+### 新增
+
+- 为 iCloud（应用专用密码）和 Linux DO Mail 增加服务端轻量 IMAP 元数据索引。
+- 新增 `/api/mail-notifications` 统一通知接口，Float 每分钟只需一次请求。
+- 新增 `mail-notifications:read` 设备令牌 Scope；正文和附件仍按需读取，不写入索引。
+
+### 安全与升级说明
+
+- Cookie-only iCloud 账号不会被后台轮询；账号凭据错误会退避重试，不产生请求风暴。
+- 应用 D1 迁移 `0035_external_mail_indexes.sql` 后即可启用；本次不发布 Chrome Web Store。
+
+## [0.10.3] - 2026-08-30
+
+### 新增
+
+- 为 Float `0.7.0` 增加附件、同步、Microsoft 文件夹、草稿、发信、回复和本地索引通知
+  的来源级最小 Scope。
+- Float 完成安全附件、稳定分页、OmniMail/QQ/Linux DO 发信、聚合通知、勿扰时段和 Web
+  深链接。
+
+### 安全与升级说明
+
+- 旧设备令牌不会静默扩大权限；用户需要在 OmniMail 网站明确重新授权。
+- 旧版 Float 令牌需要在 OmniMail 网站重新授权以获得通知 Scope。
+
 ## [0.10.2] - 2026-08-29
 
 ### 新增

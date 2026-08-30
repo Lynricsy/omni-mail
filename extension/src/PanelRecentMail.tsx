@@ -1,5 +1,6 @@
 import { Inbox, LoaderCircle, RefreshCw } from 'lucide-react'
 import type { MessageSummary } from '../../src/shared/api/api-types'
+import { getLocale, t, useLocale } from '../../src/shared/i18n'
 
 interface Props {
   loading: boolean
@@ -13,7 +14,7 @@ interface Props {
 function messageDate(timestamp: number): string {
   const date = new Date(timestamp)
   const today = new Date()
-  return new Intl.DateTimeFormat('zh-CN', date.toDateString() === today.toDateString()
+  return new Intl.DateTimeFormat(getLocale(), date.toDateString() === today.toDateString()
     ? { hour: '2-digit', minute: '2-digit', hour12: false }
     : { month: 'short', day: 'numeric' }).format(date)
 }
@@ -26,23 +27,24 @@ export function PanelRecentMail({
   refreshInterval,
   refreshing,
 }: Props) {
+  useLocale()
   const recentMessages = messages.slice(0, 3)
   const refreshText = refreshInterval > 0
-    ? `每 ${refreshInterval} 秒自动刷新`
-    : '自动刷新已关闭'
+    ? t('每 {count} 秒自动刷新', { count: refreshInterval })
+    : t('自动刷新已关闭')
 
   return (
     <section className="page-card recent-mail-card" aria-labelledby="recent-mail-title">
       <header className="recent-mail-header">
         <div>
-          <span id="recent-mail-title">当前邮箱邮件</span>
+          <span id="recent-mail-title">{t('当前邮箱邮件')}</span>
           <small>{refreshText}</small>
         </div>
         <button
           className="recent-refresh-button"
           type="button"
-          title="立即刷新"
-          aria-label="立即刷新当前邮箱"
+          title={t('立即刷新')}
+          aria-label={t('立即刷新当前邮箱')}
           disabled={refreshing}
           onClick={onRefresh}
         >
@@ -51,7 +53,7 @@ export function PanelRecentMail({
       </header>
 
       {loading && !recentMessages.length ? (
-        <div className="recent-mail-empty"><LoaderCircle className="spin" size={17} />正在读取邮件…</div>
+        <div className="recent-mail-empty"><LoaderCircle className="spin" size={17} />{t('正在读取邮件…')}</div>
       ) : recentMessages.length ? (
         <div className="recent-mail-list">
           {recentMessages.map((message) => (
@@ -63,8 +65,8 @@ export function PanelRecentMail({
             >
               <span className="recent-mail-dot" />
               <span className="recent-mail-copy">
-                <span><strong>{message.subject || '（无主题）'}</strong><time>{messageDate(message.date)}</time></span>
-                <small>{message.senderName || message.senderAddress || '未知发件人'}</small>
+                <span><strong>{message.subject || t('（无主题）')}</strong><time>{messageDate(message.date)}</time></span>
+                <small>{message.senderName || message.senderAddress || t('未知发件人')}</small>
               </span>
             </button>
           ))}
@@ -72,7 +74,7 @@ export function PanelRecentMail({
       ) : (
         <div className="recent-mail-empty">
           <Inbox size={18} />
-          <span>还没有邮件，收到后会自动显示在这里。</span>
+          <span>{t('还没有邮件，收到后会自动显示在这里。')}</span>
         </div>
       )}
     </section>

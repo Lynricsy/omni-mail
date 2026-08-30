@@ -42,6 +42,11 @@
   color: var(--text);
 }
 
+.theme-options button:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
 .theme-option-icon,
 .theme-option-check {
   display: grid;
@@ -83,3 +88,86 @@
   background: var(--accent);
   color: var(--accent-contrast);
 }
+
+.notification-settings { display: grid; gap: 12px; }
+
+.notification-settings fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.notification-settings legend {
+  padding: 0 5px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.notification-source-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 10px;
+}
+
+.notification-source-grid label {
+  display: flex;
+  min-width: 0;
+  min-height: 30px;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+
+.notification-source-grid label:has(input:disabled) { opacity: 0.6; }
+.notification-source-grid label small { margin-left: auto; font-size: 8px; }
+
+.notification-source-grid input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+.quiet-hours-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.quiet-hours-fields label {
+  display: grid;
+  gap: 5px;
+  color: var(--text-tertiary);
+  font-size: 9px;
+}
+
+.quiet-hours-fields input {
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 7px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-muted);
+  color: var(--text);
+  color-scheme: light dark;
+}
+
+.panel-language-setting,
+.panel-language-setting > div,
+.panel-language-setting > div > span {
+  display: grid;
+}
+
+.panel-language-setting { gap: 10px; }
+.panel-language-setting > div:first-child { grid-template-columns: auto 1fr; gap: 8px; }
+.panel-language-setting > div > span { gap: 2px; }
+.panel-language-setting small { color: var(--text-tertiary); font-size: 9px; }
+.panel-language-setting > div:last-child { grid-template-columns: 1fr 1fr; gap: 7px; }
+.panel-language-setting button { min-height: 34px; border: 1px solid var(--line);
+  border-radius: 9px; background: var(--surface-muted); color: var(--text-secondary);
+  font-size: 10px; font-weight: 700; }
+.panel-language-setting button.is-selected { border-color: var(--line-strong);
+  background: var(--surface-hover); color: var(--text); }

@@ -3,7 +3,7 @@
 OmniMail Float 是与本仓库一起构建的 Chrome Manifest V3 扩展。它在普通网页中
 注入一个隔离的悬浮入口，通过 OmniMail 网站授权获得可撤销的设备令牌，用于生成
 普通邮箱和 iCloud 隐藏地址，查看 OmniMail、iCloud、Linux DO、Gmail、Microsoft、QQ、
-NAVER 与 Yandex 邮箱的来信，并接收 OmniMail 新邮件通知。扩展不会收集或处理用户
+NAVER 与 Yandex 邮箱的来信，并在已授权来源上发信、回复、下载附件和接收通知。扩展不会收集或处理用户
 密码、iCloud 凭据或第三方邮箱凭据。
 
 隐私政策见 [`docs/EXTENSION_PRIVACY.md`](../docs/EXTENSION_PRIVACY.md)，商店介绍、权限
@@ -74,13 +74,17 @@ Chrome Web Store 正式版本无需配置 `APP_ORIGINS`。主管理员登录 Omn
 - 扩展令牌使用最小权限 Scope：除普通邮箱的读取、创建、收件与标记已读外，只能读取
   已连接 iCloud 账号的公开元数据、已有别名和最近来信并创建隐藏地址，以及读取已连接
   Linux DO、Gmail、Microsoft、QQ、NAVER 与 Yandex 账号的公开元数据、邮件列表和用户
-  主动打开的正文。不能读取或修改第三方凭据、管理账号、同步远端邮箱、下载附件、发信、
-  删除邮件、下载原文或修改账户设置。
+  主动打开的正文与附件。普通 OmniMail 支持草稿、发信、回复和附件；QQ 与 Linux DO
+  支持服务端开放的发信/回复能力。不能读取或修改第三方凭据、管理账号、下载原文、
+  删除邮件或修改账户设置。新邮件通知读取服务端轻量元数据索引；Cookie-only iCloud
+  账号保持手动读取，不会触发后台 IMAP。
 - Content Script 只负责悬浮窗口和当前页面邮箱输入框填充，不能读取令牌。
 - Service Worker 只接受预定义的 OmniMail API 操作，不提供任意 URL 请求代理。
 - 邮件 HTML 在 sandbox iframe 中显示，脚本、表单、远程图片和危险属性会被移除。
 - 为了自动显示悬浮入口，扩展需要访问普通 HTTP/HTTPS 网页；可以在扩展设置里关闭
   悬浮按钮。
+- 点击新邮件通知会打开用户配置的 OmniMail Web 收件箱；已有同一收件箱标签时会激活
+  该标签，不再把扩展内部 `panel.html` 作为普通网页打开。
 - 扩展设置提供跟随系统、亮色和暗色三档主题；选择保存在本机并同步应用到面板与悬浮
   窗外壳。
 

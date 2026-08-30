@@ -1,0 +1,77 @@
+-- Lightweight metadata indexes used by Float notifications for iCloud and Linux DO Mail.
+-- Bodies and attachments remain on the provider and are fetched only when opened.
+ALTER TABLE icloud_accounts ADD COLUMN uid_validity INTEGER;
+ALTER TABLE icloud_accounts ADD COLUMN last_seen_uid INTEGER NOT NULL DEFAULT 0 CHECK (last_seen_uid >= 0);
+ALTER TABLE icloud_accounts ADD COLUMN last_synced_at INTEGER;
+ALTER TABLE icloud_accounts ADD COLUMN next_sync_at INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE icloud_accounts ADD COLUMN last_error_code TEXT NOT NULL DEFAULT '';
+ALTER TABLE icloud_accounts ADD COLUMN last_error_at INTEGER;
+ALTER TABLE icloud_accounts ADD COLUMN sync_lease_id TEXT;
+ALTER TABLE icloud_accounts ADD COLUMN sync_lease_until INTEGER;
+
+CREATE INDEX idx_icloud_accounts_due
+  ON icloud_accounts(next_sync_at, status, id);
+
+CREATE TABLE icloud_imap_messages (
+  id TEXT PRIMARY KEY,
+  account_id TEXT NOT NULL REFERENCES icloud_accounts(id) ON DELETE CASCADE,
+  imap_uid INTEGER NOT NULL CHECK (imap_uid > 0),
+  uid_validity INTEGER NOT NULL CHECK (uid_validity > 0),
+  message_id_header TEXT NOT NULL DEFAULT '',
+  sender_name TEXT NOT NULL DEFAULT '',
+  sender_address TEXT NOT NULL DEFAULT '',
+  recipients_json TEXT NOT NULL DEFAULT '[]',
+  subject TEXT NOT NULL DEFAULT '',
+  preview TEXT NOT NULL DEFAULT '',
+  internal_date INTEGER NOT NULL,
+  size_bytes INTEGER NOT NULL DEFAULT 0 CHECK (size_bytes >= 0),
+  flags_json TEXT NOT NULL DEFAULT '[]',
+  is_read INTEGER NOT NULL DEFAULT 0 CHECK (is_read IN (0, 1)),
+  has_attachments INTEGER NOT NULL DEFAULT 0 CHECK (has_attachments IN (0, 1)),
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  UNIQUE (account_id, uid_validity, imap_uid)
+);
+
+CREATE INDEX idx_icloud_imap_messages_account_date
+  ON icloud_imap_messages(account_id, internal_date DESC, id DESC);
+CREATE INDEX idx_icloud_imap_messages_date
+  ON icloud_imap_messages(internal_date DESC, id DESC, account_id);
+
+ALTER TABLE linux_do_mail_accounts ADD COLUMN uid_validity INTEGER;
+ALTER TABLE linux_do_mail_accounts ADD COLUMN last_seen_uid INTEGER NOT NULL DEFAULT 0 CHECK (last_seen_uid >= 0);
+ALTER TABLE linux_do_mail_accounts ADD COLUMN last_synced_at INTEGER;
+ALTER TABLE linux_do_mail_accounts ADD COLUMN next_sync_at INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE linux_do_mail_accounts ADD COLUMN last_error_code TEXT NOT NULL DEFAULT '';
+ALTER TABLE linux_do_mail_accounts ADD COLUMN last_error_at INTEGER;
+ALTER TABLE linux_do_mail_accounts ADD COLUMN sync_lease_id TEXT;
+ALTER TABLE linux_do_mail_accounts ADD COLUMN sync_lease_until INTEGER;
+
+CREATE INDEX idx_linux_do_mail_accounts_due
+  ON linux_do_mail_accounts(next_sync_at, status, id);
+
+CREATE TABLE linux_do_mail_messages (
+  id TEXT PRIMARY KEY,
+  account_id TEXT NOT NULL REFERENCES linux_do_mail_accounts(id) ON DELETE CASCADE,
+  imap_uid INTEGER NOT NULL CHECK (imap_uid > 0),
+  uid_validity INTEGER NOT NULL CHECK (uid_validity > 0),
+  message_id_header TEXT NOT NULL DEFAULT '',
+  sender_name TEXT NOT NULL DEFAULT '',
+  sender_address TEXT NOT NULL DEFAULT '',
+  recipients_json TEXT NOT NULL DEFAULT '[]',
+  subject TEXT NOT NULL DEFAULT '',
+  preview TEXT NOT NULL DEFAULT '',
+  internal_date INTEGER NOT NULL,
+  size_bytes INTEGER NOT NULL DEFAULT 0 CHECK (size_bytes >= 0),
+  flags_json TEXT NOT NULL DEFAULT '[]',
+  is_read INTEGER NOT NULL DEFAULT 0 CHECK (is_read IN (0, 1)),
+  has_attachments INTEGER NOT NULL DEFAULT 0 CHECK (has_attachments IN (0, 1)),
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  UNIQUE (account_id, uid_validity, imap_uid)
+);
+
+CREATE INDEX idx_linux_do_mail_messages_account_date
+  ON linux_do_mail_messages(account_id, internal_date DESC, id DESC);
+CREATE INDEX idx_linux_do_mail_messages_date
+  ON linux_do_mail_messages(internal_date DESC, id DESC, account_id);

@@ -1,0 +1,61 @@
+.panel-source-nav {
+  flex: 1;
+  display: grid;
+  min-height: 0;
+  align-content: start;
+  gap: 4px;
+  margin: 2px -2px 0;
+  padding: 7px 2px 3px;
+  overflow-y: auto;
+  border-top: 1px solid var(--line);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.panel-source-nav::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.panel-nav .panel-source-nav button {
+  min-height: 46px;
+  gap: 2px;
+  padding: 4px 1px;
+  border-radius: 10px;
+}
+
+.panel-nav .panel-source-nav button:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: -2px;
+}
+
+.panel-nav .panel-source-nav button > span:last-child {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  font-size: 8px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panel-nav .panel-source-mark {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  place-items: center;
+}
+
+.panel-nav .panel-source-nav button.is-active .panel-source-mark {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+}

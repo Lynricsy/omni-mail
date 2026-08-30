@@ -37,6 +37,14 @@ export const mailboxEndpoints: ApiEndpoint[] = [
 
 export const messageEndpoints: ApiEndpoint[] = [
   {
+    method: 'GET', path: '/api/mail-notifications', group: 'messages', auth: 'authenticated',
+    title: l('读取统一新邮件通知摘要', 'Read unified new-mail notification summaries'),
+    description: l('按来源读取已连接邮箱的轻量元数据，不返回正文或附件。', 'Read lightweight metadata for connected mail sources without returning bodies or attachments.'),
+    request: 'Query · sources?, limit=1..100?',
+    response: '200 · { messages, sources, unread }',
+    examplePath: '/api/mail-notifications?limit=50&sources=icloud,linuxdo',
+  },
+  {
     method: 'GET', path: '/api/messages', group: 'messages', auth: 'authenticated',
     title: l('查询邮件列表', 'Query messages'),
     description: l('按文件夹、搜索词、邮箱或域名筛选，并使用不透明游标分页。', 'Filter by folder, query, mailbox, or domain and paginate with an opaque cursor.'),

@@ -13,6 +13,7 @@ import { consumeMicrosoftSyncJob } from '../../features/microsoft/microsoft-sync
 import { consumeQqMailSyncJob } from '../../features/qq-mail/qq-mail-sync'
 import { consumeNaverMailSyncJob } from '../../features/naver-mail/naver-mail-sync'
 import { consumeYandexMailSyncJob } from '../../features/yandex-mail/yandex-mail-sync'
+import { consumeExternalMailSyncJob } from '../../features/external-mail/external-mail-sync'
 import type { Env, MailQueueJob, MessageRow, ParseJob, StoredBody } from '../types'
 
 type ParsedAddress = {
@@ -440,6 +441,10 @@ export async function consumeEmailQueue(batch: MessageBatch<MailQueueJob>, env: 
       await consumeYandexMailSyncJob(message, env)
       continue
     }
+    if (message.body.kind === 'icloud-sync' || message.body.kind === 'linuxdo-mail-sync') {
+      await consumeExternalMailSyncJob(message, env)
+      continue
+    }
     if (message.body.kind === 'outbound') {
       await consumeOutboundJob(message, env)
       continue
@@ -462,7 +467,7 @@ export async function consumeEmailQueue(batch: MessageBatch<MailQueueJob>, env: 
       ).bind(
         queueFailureStatus(message.attempts),
         detail.slice(0, 500),
-        message.body.messageId,
+        (message.body as ParseJob).messageId,
       ).run()
       message.retry({ delaySeconds: 30 })
     }

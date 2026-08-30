@@ -13,13 +13,14 @@ by the selected instance is also governed by that instance operator's policy.
 
 - 用户提供的 OmniMail 站点地址。
 - 获得用户明确授权后，由该实例返回的账户标识、显示名称、邮箱地址、邮件摘要、用户
-  主动查看的邮件正文，已连接 iCloud 账号的公开名称、邮箱、状态、隐藏地址和邮件，
+  主动查看的邮件正文和附件，已连接 iCloud 账号的公开名称、邮箱、状态、隐藏地址和邮件，
   以及已连接 Linux DO、Gmail、Microsoft、QQ、NAVER 与 Yandex 邮箱的账号名称、
-  邮箱、状态、邮件摘要和主动查看的正文。
+  邮箱、状态、邮件摘要和主动查看的正文、附件。用户在 Float 中提交的 OmniMail 草稿、
+  发信和回复内容会按请求传输给所选实例。
 - 短期访问令牌与可撤销的刷新令牌。密码、MFA 密钥、OmniMail 网页 Cookie，以及
   iCloud Cookie、应用专用密码和 QQ 授权码不会提供给扩展。
-- 本地功能设置，例如主题偏好、悬浮入口开关、面板位置、上次选择的邮箱和用于判断新
-  邮件的邮件标识符。
+- 本地功能设置，例如主题偏好、悬浮入口开关、通知来源、勿扰时段、面板位置、上次选择
+  的邮箱和用于判断新邮件的来源游标。
 - 为显示悬浮入口，内容脚本会在普通 HTTP/HTTPS 网页中运行。只有当用户主动选择
   “填入网页”时，它才会在当前页面定位邮箱输入框并写入用户选择的地址。扩展不会收集
   或上传浏览历史、当前网页网址、网页正文、页面 Cookie 或表单中原有的值。
@@ -47,12 +48,12 @@ by the selected instance is also governed by that instance operator's policy.
 
 这些数据只用于连接用户选择的 OmniMail 实例、创建和填入普通或 iCloud 隐藏邮箱地址、
 显示 OmniMail、iCloud、Linux DO、Gmail、Microsoft、QQ、NAVER 与 Yandex 邮箱和邮件，
-以及提醒新邮件。数据不会用于广告、用户画像、信用评估或与扩展功能无关的分析。
+以及提醒新邮件。附件、草稿和发信内容仅在用户主动操作时传输。数据不会用于广告、用户画像、信用评估或与扩展功能无关的分析。
 
 The data is used only to connect to the user's selected OmniMail instance,
 create and fill regular or iCloud Hide My Email addresses, display OmniMail,
 iCloud, Linux DO, Gmail, Microsoft, QQ, NAVER, and Yandex Mail accounts and messages,
-and notify the user of new mail. It is not used for advertising, profiling,
+and notify the user of new mail. Attachments, drafts, and outbound messages are transferred only after the user acts. It is not used for advertising, profiling,
 credit assessment, or analytics unrelated to the extension's functionality.
 
 ## 存储、传输和保留 / Storage, transmission, and retention

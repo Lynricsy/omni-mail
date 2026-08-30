@@ -391,3 +391,147 @@
 .panel-select-option svg {
   color: var(--text);
 }
+
+.panel-compose-fields,
+.panel-compose-attachments {
+  display: grid;
+  gap: 8px;
+}
+.panel-compose-attachments > label,
+.panel-compose-actions,
+.panel-compose-actions button {
+  display: flex;
+  align-items: center;
+}
+.panel-compose-attachments > div span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.panel-compose-attachments small {
+  color: var(--text-tertiary);
+  font-size: 9px;
+}
+.panel-compose-error { color: var(--danger); font-size: 9px; line-height: 1.5; }
+
+.panel-compose {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  background: var(--surface);
+}
+
+.panel-compose-header {
+  display: grid;
+  gap: 14px;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.panel-compose-header .back-button { margin: 0; }
+.panel-compose-header h1 { margin: 2px 0 0; font-size: 18px; }
+.panel-compose-fields { gap: 12px; padding: 14px 18px; }
+
+.panel-compose-fields > label {
+  display: grid;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.panel-compose-fields input,
+.panel-compose-fields textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: 0;
+  background: var(--surface-muted);
+  color: var(--text);
+  font: inherit;
+}
+
+.panel-compose-fields input { min-height: 40px; padding: 0 10px; }
+.panel-compose-fields input[readonly] { color: var(--text-secondary); }
+
+.panel-compose-fields textarea {
+  min-height: 150px;
+  padding: 10px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.panel-compose-attachments > label {
+  width: max-content;
+  min-height: 34px;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.panel-compose-attachments > input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.panel-compose-attachments > div {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-size: 9px;
+}
+
+.panel-compose-attachments > div button {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-tertiary);
+  place-items: center;
+}
+
+.panel-compose-actions {
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: auto;
+  padding: 12px 18px;
+  border-top: 1px solid var(--line);
+}
+
+.panel-compose-actions button {
+  min-height: 38px;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.panel-compose-actions .is-primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+}

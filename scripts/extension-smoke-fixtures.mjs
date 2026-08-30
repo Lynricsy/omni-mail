@@ -35,7 +35,15 @@ export const float041Scopes = [
 ]
 
 export const extensionScopes = [
-  ...float041Scopes, 'linuxdo-mail:account:read', 'linuxdo-mail:messages:read',
+  ...float041Scopes, 'mail-notifications:read',
+  'linuxdo-mail:account:read', 'linuxdo-mail:messages:read',
+  'messages:attachments:read', 'messages:send', 'drafts:read', 'drafts:write',
+  'gmail:attachments:read', 'gmail:sync',
+  'qq-mail:attachments:read', 'qq-mail:sync', 'qq-mail:messages:send',
+  'microsoft:attachments:read', 'microsoft:folders:read', 'microsoft:sync',
+  'naver-mail:attachments:read', 'naver-mail:sync',
+  'yandex-mail:attachments:read', 'yandex-mail:sync',
+  'linuxdo-mail:messages:send',
 ]
 
 export const iCloudAccounts = [{

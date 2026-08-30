@@ -1,4 +1,4 @@
-import type { AppConfig, User } from '../../src/shared/api/api-types'
+import type { User } from '../../src/shared/api/api-types'
 import {
   authorizationCode,
   extensionAuthorizationUrl,
@@ -11,15 +11,26 @@ import {
   savePersistentAuth,
 } from './auth-storage'
 import type { ExtensionRequest } from './protocol'
-import {
-  discoverMailSources,
-  getIndexedSourceMessage,
-  hasIndexedSourceScopes,
-  listIndexedSourceMessages,
-} from './mail-source-background'
+import { extensionApiCall } from './extension-api'
+import { hasIndexedSourceScopes } from './mail-source-background'
+import { handleChromeNotificationClick } from './notification-navigation'
+import { normalizedNotificationSettings } from './notification-settings'
+import { runMailPoll } from './notification-poll'
 
 const MAIL_ALARM = 'omnimail-mail-poll'
-const LOCAL_SETTINGS = ['apiOrigin', 'knownMessageIds', 'floatingEnabled', 'theme'] as const
+const LOCAL_SETTINGS = [
+  'apiOrigin',
+  'knownMessageIds',
+  'knownMessageKeys',
+  'knownNotificationSources',
+  'notificationTargets',
+  'notificationsEnabled',
+  'notificationSources',
+  'quietHoursStart',
+  'quietHoursEnd',
+  'floatingEnabled',
+  'theme',
+] as const
 const SESSION_AUTH = [
   'accessToken',
   'accessExpiresAt',
@@ -61,7 +72,6 @@ class RequestError extends Error {
 }
 
 let refreshPromise: Promise<SessionAuth> | null = null
-let pollPromise: Promise<void> | null = null
 
 function normalizeApiOrigin(value: string): string {
   let url: URL
@@ -95,7 +105,7 @@ async function publicRequest<T>(
   init: RequestInit = {},
 ): Promise<T> {
   const headers = new Headers(init.headers)
-  if (init.body) headers.set('Content-Type', 'application/json')
+  if (typeof init.body === 'string') headers.set('Content-Type', 'application/json')
   const response = await fetch(`${apiOrigin}${path}`, {
     ...init,
     headers,
@@ -183,7 +193,7 @@ async function refreshAuth(): Promise<SessionAuth> {
   return refreshPromise
 }
 
-async function authenticatedRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
+async function authenticatedFetch(path: string, init: RequestInit = {}): Promise<Response> {
   const settings = await chrome.storage.local.get(['apiOrigin'])
   if (!settings.apiOrigin) throw new RequestError('请先设置 OmniMail 地址。', 401)
   let auth = await loadAuth()
@@ -194,7 +204,7 @@ async function authenticatedRequest<T>(path: string, init: RequestInit = {}): Pr
   const run = async (accessToken: string) => {
     const headers = new Headers(init.headers)
     headers.set('Authorization', `Bearer ${accessToken}`)
-    if (init.body) headers.set('Content-Type', 'application/json')
+    if (typeof init.body === 'string') headers.set('Content-Type', 'application/json')
     return fetch(`${settings.apiOrigin}${path}`, {
       ...init,
       headers,
@@ -207,70 +217,39 @@ async function authenticatedRequest<T>(path: string, init: RequestInit = {}): Pr
     auth = await refreshAuth()
     response = await run(auth.accessToken!)
   }
-  return parseResponse<T>(response)
+  return response
+}
+
+async function authenticatedRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
+  return parseResponse<T>(await authenticatedFetch(path, init))
+}
+
+function attachmentBase64(bytes: Uint8Array): string {
+  let binary = ''
+  for (let offset = 0; offset < bytes.length; offset += 32_768) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + 32_768))
+  }
+  return btoa(binary)
+}
+
+async function attachmentPayload(path: string, requestedFilename: string) {
+  const response = await authenticatedFetch(path)
+  if (!response.ok) return parseResponse<never>(response)
+  const bytes = new Uint8Array(await response.arrayBuffer())
+  if (bytes.byteLength > 5 * 1024 * 1024) throw new Error('附件超过 5 MiB 下载上限。')
+  const filename = requestedFilename.replace(/[\\/:*?"<>\r\n|]/g, '_').slice(0, 180)
+    || 'attachment.bin'
+  const contentType = response.headers.get('Content-Type') || 'application/octet-stream'
+  return { filename, contentType, contentBase64: attachmentBase64(bytes) }
 }
 
 async function apiCall(message: ExtensionRequest): Promise<unknown> {
-  switch (message.type) {
-    case 'api:config':
-      return authenticatedRequest('/api/config')
-    case 'api:mailboxes':
-      return authenticatedRequest('/api/mailboxes')
-    case 'api:domains':
-      return authenticatedRequest('/api/domains')
-    case 'api:messages': {
-      const search = new URLSearchParams({ folder: 'inbox', limit: '30' })
-      if (message.mailbox) search.set('mailbox', message.mailbox)
-      return authenticatedRequest(`/api/messages?${search}`)
-    }
-    case 'api:message':
-      return authenticatedRequest(`/api/messages/${encodeURIComponent(message.id)}`)
-    case 'api:create-mailbox':
-      return authenticatedRequest('/api/mailboxes', {
-        method: 'POST', body: JSON.stringify({ address: message.address }),
-      })
-    case 'api:mark-read':
-      return authenticatedRequest(`/api/messages/${encodeURIComponent(message.id)}`, {
-        method: 'PATCH', body: JSON.stringify({ isRead: true }),
-      })
-    case 'api:icloud-accounts':
-      return authenticatedRequest('/api/icloud/accounts')
-    case 'api:icloud-aliases':
-      return authenticatedRequest(
-        `/api/icloud/aliases?accountId=${encodeURIComponent(message.accountId)}`,
-      )
-    case 'api:create-icloud-alias':
-      return authenticatedRequest('/api/icloud/aliases', {
-        method: 'POST',
-        body: JSON.stringify({ accountId: message.accountId, label: message.label }),
-      })
-    case 'api:icloud-inbox': {
-      const search = new URLSearchParams({
-        accountId: message.accountId,
-        limit: '30',
-        days: '7',
-      })
-      if (message.alias) search.set('alias', message.alias)
-      return authenticatedRequest(`/api/icloud/inbox?${search}`)
-    }
-    case 'api:icloud-message':
-      return authenticatedRequest(
-        `/api/icloud/inbox/${encodeURIComponent(message.id)}?accountId=${encodeURIComponent(message.accountId)}`,
-      )
-    case 'api:mail-sources': {
-      const [config, auth] = await Promise.all([
-        authenticatedRequest<AppConfig>('/api/config'),
-        loadAuth(),
-      ])
-      return discoverMailSources(authenticatedRequest, config, auth.scopes)
-    }
-    case 'api:indexed-source-messages':
-      return listIndexedSourceMessages(authenticatedRequest, message)
-    case 'api:indexed-source-message':
-      return getIndexedSourceMessage(authenticatedRequest, message)
-    default:
-      throw new Error('不支持的 API 操作。')
-  }
+  return extensionApiCall(
+    message,
+    authenticatedRequest,
+    attachmentPayload,
+    async () => (await loadAuth()).scopes,
+  )
 }
 
 async function authStatus() {
@@ -321,7 +300,9 @@ async function authorize(message: Extract<ExtensionRequest, { type: 'auth:author
       redirectUri,
     }),
   })
-  await chrome.storage.local.remove(['knownMessageIds'])
+  await chrome.storage.local.remove([
+    'knownMessageIds', 'knownMessageKeys', 'knownNotificationSources', 'notificationTargets',
+  ])
   await saveTokens(tokens)
   if (previousOrigin && previousAuth.refreshToken
     && previousAuth.refreshToken !== tokens.refreshToken) {
@@ -361,7 +342,9 @@ async function logout() {
   } finally {
     await clearAuth()
     await chrome.alarms.clear(MAIL_ALARM)
-    await chrome.storage.local.remove(['knownMessageIds'])
+    await chrome.storage.local.remove([
+      'knownMessageIds', 'knownMessageKeys', 'knownNotificationSources', 'notificationTargets',
+    ])
   }
   return { ok: true as const }
 }
@@ -395,12 +378,16 @@ async function handleMessage(message: ExtensionRequest, sender: chrome.runtime.M
     case 'auth:logout': return logout()
     case 'page:fill-email': return fillCurrentPage(message.email, sender)
     case 'settings:get': {
-      const settings = await chrome.storage.local.get(['floatingEnabled', 'theme'])
+      const settings = await chrome.storage.local.get([
+        'floatingEnabled', 'theme', 'notificationsEnabled', 'notificationSources',
+        'quietHoursStart', 'quietHoursEnd',
+      ])
       return {
         floatingEnabled: settings.floatingEnabled !== false,
         theme: settings.theme === 'light' || settings.theme === 'dark'
           ? settings.theme
           : 'system',
+        ...normalizedNotificationSettings(settings),
       }
     }
     case 'settings:set-floating':
@@ -412,6 +399,20 @@ async function handleMessage(message: ExtensionRequest, sender: chrome.runtime.M
       }
       await chrome.storage.local.set({ theme: message.theme })
       return { ok: true as const }
+    case 'settings:set-notifications': {
+      const settings = normalizedNotificationSettings(message)
+      await chrome.storage.local.set(settings)
+      if (!settings.notificationsEnabled) {
+        await Promise.all([
+          chrome.action.setBadgeText({ text: '' }),
+          chrome.notifications.getAll().then((items) => Promise.all(
+            Object.keys(items).filter((id) => id.startsWith('float:'))
+              .map((id) => chrome.notifications.clear(id)),
+          )),
+        ])
+      }
+      return { ok: true as const }
+    }
     default: throw new Error('不支持的扩展操作。')
   }
 }
@@ -425,42 +426,8 @@ chrome.runtime.onMessage.addListener((message: ExtensionRequest, sender, sendRes
   return true
 })
 
-async function updateBadge(unread: number): Promise<void> {
-  await Promise.all([
-    chrome.action.setBadgeBackgroundColor({ color: '#c9342f' }),
-    chrome.action.setBadgeText({ text: unread > 0 ? String(Math.min(unread, 99)) : '' }),
-  ])
-}
-
-async function pollMail(): Promise<void> {
-  const result = await authenticatedRequest<{
-    messages: Array<{ id: string; subject: string; senderName: string; senderAddress: string }>
-    counts: { unread: number }
-  }>('/api/messages?folder=inbox&limit=30')
-  const settings = await chrome.storage.local.get(['knownMessageIds'])
-  const previous = Array.isArray(settings.knownMessageIds)
-    ? new Set<string>(settings.knownMessageIds)
-    : null
-  const nextIds = result.messages.map((message) => message.id)
-  const fresh = previous ? result.messages.filter((message) => !previous.has(message.id)) : []
-  await chrome.storage.local.set({ knownMessageIds: nextIds })
-  await updateBadge(result.counts.unread)
-  if (fresh.length) {
-    const first = fresh[0]
-    await chrome.notifications.create(`omnimail:${first.id}`, {
-      type: 'basic',
-      iconUrl: chrome.runtime.getURL('icons/icon128.png'),
-      title: fresh.length === 1 ? '收到新邮件' : `收到 ${fresh.length} 封新邮件`,
-      message: `${first.senderName || first.senderAddress} · ${first.subject || '（无主题）'}`,
-    })
-  }
-}
-
 function runPollMail(): Promise<void> {
-  if (!pollPromise) {
-    pollPromise = pollMail().finally(() => { pollPromise = null })
-  }
-  return pollPromise
+  return runMailPoll(authenticatedRequest, async () => (await loadAuth()).scopes)
 }
 
 async function configureMailAlarm(): Promise<void> {
@@ -474,8 +441,8 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === MAIL_ALARM) void runPollMail().catch(() => {})
 })
 
-chrome.notifications.onClicked.addListener(() => {
-  void chrome.tabs.create({ url: chrome.runtime.getURL('panel.html#inbox') })
+chrome.notifications.onClicked.addListener((notificationId) => {
+  void handleChromeNotificationClick(notificationId)
 })
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -483,6 +450,12 @@ chrome.runtime.onInstalled.addListener(() => {
     const defaults: Record<string, unknown> = {}
     if (settings.floatingEnabled === undefined) defaults.floatingEnabled = true
     if (settings.theme === undefined) defaults.theme = 'system'
+    if (settings.notificationsEnabled === undefined) defaults.notificationsEnabled = true
+    if (settings.notificationSources === undefined) {
+      defaults.notificationSources = normalizedNotificationSettings({}).notificationSources
+    }
+    if (settings.quietHoursStart === undefined) defaults.quietHoursStart = ''
+    if (settings.quietHoursEnd === undefined) defaults.quietHoursEnd = ''
     if (Object.keys(defaults).length) return chrome.storage.local.set(defaults)
   })
   void configureMailAlarm()

@@ -9,12 +9,20 @@ export interface MailSourceAccount {
   email: string
   status: 'active' | 'syncing' | 'error'
   needsAttention: boolean
+  senders?: Array<{ name: string; email: string }>
 }
 
 export interface MailSourceDescriptor {
   id: MailSourceId
   label: string
   accounts: MailSourceAccount[]
+  capabilities?: {
+    attachments: boolean
+    folders: boolean
+    reply: boolean
+    send: boolean
+    sync: boolean
+  }
 }
 
 export interface IndexedMessageSummary {
@@ -39,6 +47,19 @@ export interface IndexedMessageDetail extends IndexedMessageSummary {
   body: string
   html: string
   attachmentCount: number
+  attachments: FloatAttachment[]
+}
+
+export interface FloatAttachment {
+  id: string
+  filename: string
+  contentType: string
+  size: number
+}
+
+export interface MailSourceFolder {
+  path: string
+  label: string
 }
 
 export interface IndexedSourceAdapter {
@@ -46,8 +67,11 @@ export interface IndexedSourceAdapter {
   label: string
   accountsPath: string
   webPath: string
-  messagesPath(input: { accountId?: string; query?: string; folder?: 'inbox' | 'sent' }): string
-  messagePath(accountId: string, messageId: string, folder?: 'inbox' | 'sent'): string
+  messagesPath(input: { accountId?: string; query?: string; cursor?: string; folder?: string }): string
+  messagePath(accountId: string, messageId: string, folder?: string): string
+  attachmentPath(accountId: string, messageId: string, attachmentId: string): string
+  foldersPath?(accountId: string): string
+  syncPath?(accountId: string): string
 }
 
 function adapter(id: IndexedMailSourceId, label: string, apiRoot: string): IndexedSourceAdapter {
@@ -56,15 +80,28 @@ function adapter(id: IndexedMailSourceId, label: string, apiRoot: string): Index
     label,
     accountsPath: `/api/${apiRoot}/accounts`,
     webPath: `/${apiRoot}`,
-    messagesPath: ({ accountId, query }) => {
+    messagesPath: ({ accountId, query, cursor, folder }) => {
       const search = new URLSearchParams({ limit: '30' })
       if (accountId) search.set('accountId', accountId)
       if (query) search.set('q', query)
+      if (cursor) search.set('cursor', cursor)
+      if (id === 'microsoft' && folder) search.set('folder', folder)
       return `/api/${apiRoot}/messages?${search}`
     },
     messagePath: (accountId, messageId) => (
       `/api/${apiRoot}/accounts/${encodeURIComponent(accountId)}`
       + `/messages/${encodeURIComponent(messageId)}`
+    ),
+    attachmentPath: (accountId, messageId, attachmentId) => (
+      `/api/${apiRoot}/accounts/${encodeURIComponent(accountId)}`
+      + `/messages/${encodeURIComponent(messageId)}`
+      + `/attachments/${encodeURIComponent(attachmentId)}`
+    ),
+    foldersPath: id === 'microsoft' ? (accountId) => (
+      `/api/microsoft/accounts/${encodeURIComponent(accountId)}/folders`
+    ) : undefined,
+    syncPath: (accountId) => (
+      `/api/${apiRoot}/accounts/${encodeURIComponent(accountId)}/sync`
     ),
   }
 }
@@ -84,6 +121,7 @@ function linuxDoAdapter(): IndexedSourceAdapter {
     messagePath: (_accountId, messageId, folder = 'inbox') => (
       `/api/linux-do-mail/${folder}/${encodeURIComponent(messageId)}`
     ),
+    attachmentPath: () => '',
   }
 }
 
@@ -108,6 +146,7 @@ interface AccountInput {
   email?: string
   username?: string
   status: string
+  identities?: Array<{ name: string; email: string }>
 }
 
 export function normalizeIndexedAccounts(
@@ -123,6 +162,7 @@ export function normalizeIndexedAccounts(
       ? 'syncing'
       : account.status === 'active' ? 'active' : 'error',
     needsAttention: !['active', 'syncing'].includes(account.status),
+    senders: account.identities,
   }))
 }
 
@@ -163,7 +203,12 @@ interface MessageDetailInput extends MessageInput {
   cc: string
   body: string
   html: string
-  attachments: unknown[]
+  attachments: Array<{
+    partId: string
+    filename: string
+    contentType: string
+    size: number
+  }>
 }
 
 export function normalizeIndexedMessageDetail(
@@ -177,5 +222,11 @@ export function normalizeIndexedMessageDetail(
     body: message.body,
     html: message.html,
     attachmentCount: message.attachments.length,
+    attachments: message.attachments.map((attachment) => ({
+      id: attachment.partId,
+      filename: attachment.filename,
+      contentType: attachment.contentType,
+      size: attachment.size,
+    })),
   }
 }

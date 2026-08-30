@@ -1,6 +1,7 @@
 import { Check, Monitor, Moon, Sun } from 'lucide-react'
 import type { ReactNode } from 'react'
 import type { ThemePreference } from './protocol'
+import { t, useLocale } from '../../src/shared/i18n'
 
 const options: Array<{
   value: ThemePreference
@@ -17,11 +18,12 @@ export function PanelThemeSettings({ value, onChange }: {
   value: ThemePreference
   onChange: (theme: ThemePreference) => void
 }) {
+  useLocale()
   return (
     <section className="page-card theme-setting-card" aria-labelledby="theme-setting-title">
       <div className="theme-setting-heading">
-        <strong id="theme-setting-title">外观主题</strong>
-        <span>立即生效并保存在当前浏览器</span>
+        <strong id="theme-setting-title">{t('外观主题')}</strong>
+        <span>{t('立即生效并保存在当前浏览器')}</span>
       </div>
       <div className="theme-options" role="group" aria-labelledby="theme-setting-title">
         {options.map((option) => {
@@ -30,7 +32,7 @@ export function PanelThemeSettings({ value, onChange }: {
             <button className={selected ? 'is-selected' : ''} type="button"
               aria-pressed={selected} key={option.value} onClick={() => onChange(option.value)}>
               <span className="theme-option-icon" aria-hidden="true">{option.icon}</span>
-              <span><strong>{option.label}</strong><small>{option.description}</small></span>
+              <span><strong>{t(option.label)}</strong><small>{t(option.description)}</small></span>
               <span className="theme-option-check" aria-hidden="true">
                 {selected && <Check size={13} />}
               </span>

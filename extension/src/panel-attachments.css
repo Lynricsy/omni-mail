@@ -1,0 +1,35 @@
+.panel-attachments { display: grid; gap: 8px; padding: 11px 16px;
+  border-bottom: 1px solid var(--line); background: var(--surface-muted); }
+.panel-attachments-heading strong, .panel-attachment-list article > div,
+.panel-attachment-list button, .panel-attachment-preview header {
+  display: flex; align-items: center;
+}
+.panel-attachments-heading strong { gap: 6px; color: var(--text-secondary); font-size: 10px; }
+.panel-attachment-list { display: grid; gap: 6px; }
+.panel-attachment-list article { display: flex; min-width: 0; align-items: center;
+  justify-content: space-between; gap: 8px; padding: 7px 8px; border: 1px solid var(--line);
+  border-radius: 9px; background: var(--surface); }
+.panel-attachment-list article > span { display: grid; min-width: 0; gap: 2px; }
+.panel-attachment-list article strong, .panel-attachment-preview header strong {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.panel-attachment-list article strong { color: var(--text); font-size: 10px; }
+.panel-attachment-list article small { color: var(--text-tertiary); font-size: 9px; }
+.panel-attachment-list article > div { flex: 0 0 auto; gap: 5px; }
+.panel-attachment-list button, .panel-attachment-preview header button {
+  min-height: 30px; justify-content: center; gap: 4px; padding: 0 8px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--surface-muted);
+  color: var(--text-secondary); font-size: 9px; font-weight: 700;
+}
+.panel-attachment-error { color: var(--danger); font-size: 9px; line-height: 1.5; }
+.panel-attachment-preview { overflow: hidden; border: 1px solid var(--line);
+  border-radius: 10px; background: var(--surface); }
+.panel-attachment-preview header { min-width: 0; justify-content: space-between; gap: 8px;
+  padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.panel-attachment-preview header strong { font-size: 10px; }
+.panel-attachment-preview header button { width: 30px; padding: 0; }
+.panel-attachment-preview img { display: block; width: 100%; max-height: 280px;
+  object-fit: contain; }
+.panel-attachment-preview pre { max-height: 220px; margin: 0; padding: 10px; overflow: auto;
+  color: var(--text); font: 10px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace;
+  overflow-wrap: anywhere; white-space: pre-wrap; }

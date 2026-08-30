@@ -62,9 +62,13 @@ export const enSecurity: Record<string, string> = {
     'Use existing Hide My Email addresses, create new ones, and read incoming mail',
   '读取收件箱': 'Read inbox',
   '查看邮箱列表、邮件摘要和邮件正文': 'View mailbox lists, message summaries, and message bodies',
+  '查看邮箱列表、邮件正文和用户主动打开的附件':
+    'View mailbox lists, message bodies, and attachments you explicitly open',
   '已连接的第三方邮箱': 'Connected third-party mail accounts',
   '读取 Linux DO、Gmail、Microsoft、QQ、NAVER、Yandex 账号和邮件':
     'Read connected Linux DO, Gmail, Microsoft, QQ, NAVER, and Yandex accounts and mail',
+  '读取已连接账号、文件夹和邮件，并在用户操作后请求同步':
+    'Read connected accounts, folders, and mail, and request synchronization after your action',
   '新邮件通知': 'New mail notifications',
   '扩展在后台检查并提醒新邮件': 'Let the extension check for and notify you about new mail',
   '换一个账户': 'Use another account',

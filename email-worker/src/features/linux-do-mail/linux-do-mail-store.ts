@@ -149,7 +149,8 @@ export class LinuxDoMailAccountStore {
     )
     const result = await this.env.DB.prepare(
       `UPDATE linux_do_mail_accounts SET password_cipher = ?, status = 'active',
-       last_validated = ?, last_error = '', updated_at = ?
+       last_validated = ?, last_error = '', last_error_code = '', last_error_at = NULL,
+       next_sync_at = 0, sync_lease_id = NULL, sync_lease_until = NULL, updated_at = ?
        WHERE id = ? AND user_id = ?`,
     ).bind(passwordCipher, validatedAt, validatedAt, accountId, this.userId).run()
     if (!result.meta.changes) {

@@ -7,6 +7,7 @@ import { api, type MicrosoftAccount, type MicrosoftFolder, type MicrosoftMessage
   type MicrosoftMessageSummary, type PageInfo } from '../../../shared/api'
 import { errorMessage } from '../../../shared/api/errorMessage'
 import { t } from '../../../shared/i18n'
+import { notificationDeepLink } from '../../../shared/mail/notificationDeepLink'
 import { ListScrollTopHeading } from '../../../shared/ui/mail-workspace/ListScrollTopHeading'
 import { useMailListScroll } from '../../../shared/ui/mail-workspace/hooks/useMailListScroll'
 import '../../../shared/ui/mail-workspace/styles/workspace.css'
@@ -30,8 +31,9 @@ export function MicrosoftWorkspace({ enabled, remoteImagesEnabled }: {
   remoteImagesEnabled: boolean
 }) {
   const mailListScroll = useMailListScroll()
+  const pendingDeepLink = useRef(notificationDeepLink('microsoft'))
   const [accounts, setAccounts] = useState<MicrosoftAccount[]>([])
-  const [accountId, setAccountId] = useState('')
+  const [accountId, setAccountId] = useState(pendingDeepLink.current?.accountId || '')
   const [folders, setFolders] = useState<MicrosoftFolder[]>([])
   const [folderPath, setFolderPath] = useState('INBOX')
   const [limit, setLimit] = useState(50)
@@ -117,6 +119,15 @@ export function MicrosoftWorkspace({ enabled, remoteImagesEnabled }: {
   useEffect(() => { void loadAccounts().catch((loadError) => setError(errorMessage(loadError))) }, [loadAccounts])
   useEffect(() => { void loadFolders() }, [loadFolders])
   useEffect(() => { void loadMessages() }, [loadMessages])
+  useEffect(() => {
+    const link = pendingDeepLink.current
+    const message = link && messages.find(({ id, account }) => (
+      id === link.messageId && (!link.accountId || account.id === link.accountId)
+    ))
+    if (!message) return
+    pendingDeepLink.current = null
+    void selectMessage(message)
+  }, [messages])
   useEffect(() => {
     const timer = window.setTimeout(() => setSearchQuery(query.trim()), 300)
     return () => window.clearTimeout(timer)

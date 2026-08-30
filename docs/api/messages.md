@@ -8,7 +8,30 @@
 
 > Lists, details, state, attachments, raw source, sending, replies, and translation.
 
-本分类共 **10** 个端点。返回 [完整 API 索引](README.md) 或 [API 架构与安全说明](../API.md)。
+本分类共 **11** 个端点。返回 [完整 API 索引](README.md) 或 [API 架构与安全说明](../API.md)。
+
+<!-- endpoint:GET /api/mail-notifications catalog:99e8ea3dcf96 -->
+## `GET /api/mail-notifications`
+
+**读取统一新邮件通知摘要 / Read unified new-mail notification summaries**
+
+从 OmniMail 及已启用的外部邮箱索引读取统一的新邮件摘要，供浏览器扩展轮询提醒。
+
+> Read unified new-mail summaries from OmniMail and enabled external-mail indexes for extension polling.
+
+| 项目 | 内容 |
+| --- | --- |
+| 认证 | 登录用户；支持 Session Cookie 或 Access Token |
+| 请求 | Query · sources?, limit=1..100? |
+| 成功响应 | 200 · { messages, sources, unread } |
+
+### cURL 示例
+
+```bash
+curl --request GET \
+  --url "https://mail.example.com/api/mail-notifications?limit=50&sources=icloud,linuxdo" \
+  --header "Authorization: Bearer om_at_..."
+```
 
 <!-- endpoint:GET /api/messages catalog:4a9a3a6e92c2 -->
 ## `GET /api/messages`

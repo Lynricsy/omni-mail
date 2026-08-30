@@ -44,6 +44,7 @@ import {
 } from '../model/icloudMailCache'
 import { parseICloudSender } from '../../../shared/mail/sender'
 import { t } from '../../../shared/i18n'
+import { notificationDeepLink } from '../../../shared/mail/notificationDeepLink'
 import { useMailListScroll } from '../../../shared/ui/mail-workspace/hooks/useMailListScroll'
 import {
   AddICloudAccountDialog,
@@ -79,8 +80,9 @@ export function ICloudWorkspace({ userId, enabled, remoteImagesEnabled }: {
   remoteImagesEnabled: boolean
 }) {
   const mailListScroll = useMailListScroll()
+  const pendingDeepLink = useRef(notificationDeepLink('icloud'))
   const [accounts, setAccounts] = useState<ICloudAccount[]>([])
-  const [selectedId, setSelectedId] = useState('')
+  const [selectedId, setSelectedId] = useState(pendingDeepLink.current?.accountId || '')
   const [aliases, setAliases] = useState<ICloudAlias[]>([])
   const [selectedAlias, setSelectedAlias] = useState('')
   const [messages, setMessages] = useState<ICloudMessage[]>([])
@@ -104,11 +106,20 @@ export function ICloudWorkspace({ userId, enabled, remoteImagesEnabled }: {
   const aliasController = useRef<AbortController | null>(null)
   const inboxController = useRef<AbortController | null>(null)
   const messageController = useRef<AbortController | null>(null)
+  const openDeepLinkMessage = useEffectEvent((message: ICloudMessage) => openMessage(message))
   const selected = accounts.find((account) => account.id === selectedId)
   const activeAlias = aliases.find((alias) => alias.email === selectedAlias)
   const activeMainAddress = selected?.hasAppPassword && selected.icloudEmail === selectedAlias
     ? selected.icloudEmail
     : ''
+
+  useEffect(() => {
+    const link = pendingDeepLink.current
+    const message = link && messages.find(({ id }) => id === link.messageId)
+    if (!message) return
+    pendingDeepLink.current = null
+    void openDeepLinkMessage(message)
+  }, [messages])
 
   const loadAccounts = useCallback(async () => {
     if (!enabled) { setLoading(false); return }

@@ -1,5 +1,11 @@
 import { ImapConnection, quoteImapValue } from '../../platform/imap/imap-connection'
 import { ImapConnectionError } from '../../platform/imap/imap-errors'
+import {
+  examineIndexedInbox,
+  fetchIndexedMetadata,
+  searchIndexedUidsAfter,
+  searchLatestIndexedUids,
+} from '../../platform/imap/imap-index'
 import { iCloudImapMessageIsRead } from '../icloud/icloud-imap-flags'
 import { parseICloudMessage } from '../icloud/icloud-message-parser'
 import type { LinuxDoMailMessage } from './linux-do-mail-types'
@@ -46,6 +52,22 @@ export class LinuxDoMailImapClient {
 
   async test(): Promise<void> {
     await this.connection.command('EXAMINE INBOX')
+  }
+
+  async examineInbox() {
+    return examineIndexedInbox(this.connection, 'Linux DO Mail')
+  }
+
+  async searchLatestUids(uidNext: number, limit = 50) {
+    return searchLatestIndexedUids(this.connection, uidNext, limit)
+  }
+
+  async searchAfter(uid: number, uidNext: number, limit = 50) {
+    return searchIndexedUidsAfter(this.connection, uid, uidNext, limit)
+  }
+
+  async fetchMetadata(uids: number[]) {
+    return fetchIndexedMetadata(this.connection, uids)
   }
 
   async listInbox(limit = 20, query = ''): Promise<LinuxDoMailMessage[]> {

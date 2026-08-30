@@ -8,6 +8,10 @@ import { enqueueDueMicrosoftSyncs } from '../../features/microsoft/microsoft-syn
 import { enqueueDueQqMailSyncs } from '../../features/qq-mail/qq-mail-sync'
 import { enqueueDueNaverMailSyncs } from '../../features/naver-mail/naver-mail-sync'
 import { enqueueDueYandexMailSyncs } from '../../features/yandex-mail/yandex-mail-sync'
+import {
+  enqueueDueICloudSyncs,
+  enqueueDueLinuxDoMailSyncs,
+} from '../../features/external-mail/external-mail-sync'
 import { startScheduledBackup } from '../../features/admin/settings/storage-policy'
 import type { Env } from '../../app/types'
 
@@ -223,6 +227,16 @@ export async function cleanup(env: Env): Promise<void> {
     await enqueueDueYandexMailSyncs(env, now)
   } catch (error) {
     console.error('Unable to enqueue Yandex Mail synchronization', error)
+  }
+  try {
+    await enqueueDueICloudSyncs(env, now)
+  } catch (error) {
+    console.error('Unable to enqueue iCloud synchronization', error)
+  }
+  try {
+    await enqueueDueLinuxDoMailSyncs(env, now)
+  } catch (error) {
+    console.error('Unable to enqueue Linux DO Mail synchronization', error)
   }
   await purgePendingObjectDeletions(env)
   await startScheduledBackup(env, now)

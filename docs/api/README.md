@@ -2,7 +2,7 @@
 
 # OmniMail 完整 HTTP API 参考
 
-当前 Worker 共公开 **168** 个 HTTP 端点。本文档由代码中的 API Catalog 自动生成，
+当前 Worker 共公开 **169** 个 HTTP 端点。本文档由代码中的 API Catalog 自动生成，
 与 Webmail `/settings/api` 使用同一份数据源。架构、安全模型、限速和数据生命周期说明见
 [`docs/API.md`](../API.md)。
 
@@ -46,7 +46,7 @@ Webhook 端点按文档示例提交 Svix 签名头。除公开端点外，服务
 | [系统与公开入口](system.md) | 8 | 健康检查、初始化、注册、邀请落地、代理与 Webhook。 |
 | [认证与账户](authentication.md) | 20 | 网页登录、设备令牌、MFA、扩展授权和账户生命周期。 |
 | [域名与邮箱地址](mailboxes.md) | 5 | 读取域名并创建、启停、切换或删除邮箱地址。 |
-| [邮件](messages.md) | 10 | 列表、详情、状态、附件、原文、发信、回复和翻译。 |
+| [邮件](messages.md) | 11 | 列表、详情、状态、附件、原文、发信、回复和翻译。 |
 | [草稿与附件](drafts.md) | 8 | 服务端草稿的创建、保存、附件和幂等发送。 |
 | [iCloud 隐藏邮箱](icloud.md) | 13 | iCloud 账号、凭据、隐藏地址和按需收件箱。 |
 | [Gmail 聚合收件箱](gmail.md) | 10 | 多账号凭据、受控 IMAP 同步、聚合索引、正文与附件。 |

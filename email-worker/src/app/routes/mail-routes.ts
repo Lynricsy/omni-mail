@@ -16,6 +16,7 @@ import { sendMessage, type NewMessageInput } from '../../features/messages/send-
 import { outboundRateLimitRoutes } from '../../features/outbound/outbound-rate-limit-routes'
 import { clientIp } from '../../shared/http/api-helpers'
 import { mailFeatureRoutes } from './mail-feature-routes'
+import { listMailNotifications } from '../../features/notifications/mail-notification-api'
 
 export function registerMailRoutes(app: Hono<AppContext>): void {
 app.get('/api/mailboxes', (context) => (
@@ -48,6 +49,9 @@ app.delete('/api/mailboxes/:address', (context) => (
 ))
 
 app.get('/api/messages', (context) => listMessages(context.env, context.get('user'), context.req.raw))
+app.get('/api/mail-notifications', (context) => (
+  listMailNotifications(context.env, context.get('user'), context.req.raw)
+))
 app.route('/api', iCloudRoutes)
 app.route('/api', gmailRoutes)
 app.route('/api', microsoftRoutes)

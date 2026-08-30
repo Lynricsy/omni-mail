@@ -27,6 +27,7 @@ import { api, type LinuxDoMailAccount, type LinuxDoMailMessage } from '../../../
 import { errorMessage } from '../../../shared/api/errorMessage'
 import { parseICloudSender } from '../../../shared/mail/sender'
 import { t } from '../../../shared/i18n'
+import { notificationDeepLink } from '../../../shared/mail/notificationDeepLink'
 import '../../../shared/ui/mail-workspace/styles/workspace.css'
 import '../styles/linux-do-mail.css'
 import { DangerConfirmDialog } from '../../../shared/ui/dialogs/DangerConfirmDialog'
@@ -142,6 +143,7 @@ export function LinuxDoMailWorkspace({ remoteImagesEnabled, canSend }: {
   canSend: boolean
 }) {
   const mailListScroll = useMailListScroll()
+  const pendingDeepLink = useRef(notificationDeepLink('linuxdo'))
   const [enabled, setEnabled] = useState(true)
   const [account, setAccount] = useState<LinuxDoMailAccount | null>(null)
   const [folder, setFolder] = useState<'inbox' | 'sent'>('inbox')
@@ -152,6 +154,14 @@ export function LinuxDoMailWorkspace({ remoteImagesEnabled, canSend }: {
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
   const [messageLoading, setMessageLoading] = useState(false)
+
+  useEffect(() => {
+    const link = pendingDeepLink.current
+    const message = link && messages.find(({ id }) => id === link.messageId)
+    if (!message) return
+    pendingDeepLink.current = null
+    void openMessage(message)
+  }, [messages])
   const [connecting, setConnecting] = useState(false)
   const [action, setAction] = useState<'verify' | 'update' | 'send' | 'disconnect' | ''>('')
   const [connectOpen, setConnectOpen] = useState(false)

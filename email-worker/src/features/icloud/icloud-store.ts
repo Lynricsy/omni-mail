@@ -295,6 +295,8 @@ export class ICloudAccountStore {
     )
     const result = await this.env.DB.prepare(
       `UPDATE icloud_accounts SET icloud_email = ?, app_password_cipher = ?,
+       status = 'active', last_error = '', last_error_code = '', last_error_at = NULL,
+       next_sync_at = 0, sync_lease_id = NULL, sync_lease_until = NULL,
        updated_at = ? WHERE id = ? AND user_id = ?`,
     ).bind(icloudEmail, cipher, new Date().toISOString(), id, this.userId).run()
     if (!result.meta.changes) throw new ICloudStoreError(404, 'iCloud 账号不存在。')

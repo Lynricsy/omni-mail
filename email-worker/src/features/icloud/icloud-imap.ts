@@ -2,6 +2,12 @@ import { ICloudRemoteError } from './icloud-apple'
 import { ImapConnection } from '../../platform/imap/imap-connection'
 import { ImapConnectionError } from '../../platform/imap/imap-errors'
 import {
+  examineIndexedInbox,
+  fetchIndexedMetadata,
+  searchIndexedUidsAfter,
+  searchLatestIndexedUids,
+} from '../../platform/imap/imap-index'
+import {
   iCloudImapMessageIsRead,
   iCloudImapReadUpdate,
   iCloudImapSearchCriteria,
@@ -69,6 +75,22 @@ export class ICloudImapClient {
 
   async test(): Promise<void> {
     await this.command('EXAMINE INBOX')
+  }
+
+  async examineInbox() {
+    return examineIndexedInbox(this.connection, 'iCloud')
+  }
+
+  async searchLatestUids(uidNext: number, limit = 50) {
+    return searchLatestIndexedUids(this.connection, uidNext, limit)
+  }
+
+  async searchAfter(uid: number, uidNext: number, limit = 50) {
+    return searchIndexedUidsAfter(this.connection, uid, uidNext, limit)
+  }
+
+  async fetchMetadata(uids: number[]) {
+    return fetchIndexedMetadata(this.connection, uids)
   }
 
   private async search(criteria: string, utf8 = false): Promise<number[]> {

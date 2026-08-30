@@ -13,11 +13,22 @@ describe('Float indexed mail source adapters', () => {
       .toBe('/api/gmail/messages?limit=30&accountId=account+%2F+1&q=code+%26+test')
     expect(gmail.messagePath('account / 1', 'message ? 1'))
       .toBe('/api/gmail/accounts/account%20%2F%201/messages/message%20%3F%201')
+    expect(gmail.messagesPath({ cursor: 'next / page' }))
+      .toBe('/api/gmail/messages?limit=30&cursor=next+%2F+page')
+    expect(gmail.attachmentPath('account / 1', 'message ? 1', 'part / 1'))
+      .toBe('/api/gmail/accounts/account%20%2F%201/messages/message%20%3F%201/attachments/part%20%2F%201')
+    expect(gmail.syncPath?.('account / 1'))
+      .toBe('/api/gmail/accounts/account%20%2F%201/sync')
 
     const qq = getIndexedSourceAdapter('qq')!
     expect(qq.accountsPath).toBe('/api/qq-mail/accounts')
     expect(qq.webPath).toBe('/qq-mail')
     expect(getIndexedSourceAdapter('microsoft')?.accountsPath).toBe('/api/microsoft/accounts')
+    expect(getIndexedSourceAdapter('microsoft')?.foldersPath?.('account / 1'))
+      .toBe('/api/microsoft/accounts/account%20%2F%201/folders')
+    expect(getIndexedSourceAdapter('microsoft')?.messagesPath({
+      accountId: 'account-1', folder: 'Archive / 2026',
+    })).toBe('/api/microsoft/messages?limit=30&accountId=account-1&folder=Archive+%2F+2026')
     expect(getIndexedSourceAdapter('naver')?.webPath).toBe('/naver-mail')
     expect(getIndexedSourceAdapter('yandex')?.messagePath('account-1', 'message-1'))
       .toBe('/api/yandex-mail/accounts/account-1/messages/message-1')

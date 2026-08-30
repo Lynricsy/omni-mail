@@ -22,6 +22,7 @@ import {
 } from '../../../shared/api'
 import { errorMessage } from '../../../shared/api/errorMessage'
 import { t } from '../../../shared/i18n'
+import { notificationDeepLink } from '../../../shared/mail/notificationDeepLink'
 import { ListScrollTopHeading } from '../../../shared/ui/mail-workspace/ListScrollTopHeading'
 import { useMailListScroll } from '../../../shared/ui/mail-workspace/hooks/useMailListScroll'
 import '../../../shared/ui/mail-workspace/styles/workspace.css'
@@ -53,8 +54,9 @@ export function YandexMailWorkspace({ enabled, remoteImagesEnabled }: {
   remoteImagesEnabled: boolean
 }) {
   const mailListScroll = useMailListScroll()
+  const pendingDeepLink = useRef(notificationDeepLink('yandex'))
   const [accounts, setAccounts] = useState<YandexMailAccount[]>([])
-  const [accountId, setAccountId] = useState('')
+  const [accountId, setAccountId] = useState(pendingDeepLink.current?.accountId || '')
   const [query, setQuery] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [messages, setMessages] = useState<YandexMailMessageSummary[]>([])
@@ -153,6 +155,15 @@ export function YandexMailWorkspace({ enabled, remoteImagesEnabled }: {
     }
   }, [dialogMode, enabled, loadAccounts])
   useEffect(() => { void loadMessages() }, [loadMessages])
+  useEffect(() => {
+    const link = pendingDeepLink.current
+    const message = link && messages.find(({ id, account }) => (
+      id === link.messageId && (!link.accountId || account.id === link.accountId)
+    ))
+    if (!message) return
+    pendingDeepLink.current = null
+    void selectMessage(message)
+  }, [messages])
   useEffect(() => {
     const timer = window.setTimeout(() => setSearchQuery(query.trim()), 300)
     return () => window.clearTimeout(timer)

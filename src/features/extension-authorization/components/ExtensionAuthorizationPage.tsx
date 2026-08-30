@@ -92,8 +92,8 @@ export function ExtensionAuthorizationPage({
               <div className="extension-auth-permissions" aria-label={t('请求的权限')}>
                 <article><MailPlus size={18} /><span><strong>{t('生成邮箱')}</strong><small>{t('在你有权限的域名下创建随机地址')}</small></span><Check size={16} /></article>
                 <article><Cloud size={18} /><span><strong>{t('iCloud 隐藏邮箱')}</strong><small>{t('使用已有隐藏地址、创建新地址并读取来信')}</small></span><Check size={16} /></article>
-                <article><Inbox size={18} /><span><strong>{t('读取收件箱')}</strong><small>{t('查看邮箱列表、邮件摘要和邮件正文')}</small></span><Check size={16} /></article>
-                <article><AtSign size={18} /><span><strong>{t('已连接的第三方邮箱')}</strong><small>{t('读取 Linux DO、Gmail、Microsoft、QQ、NAVER、Yandex 账号和邮件')}</small></span><Check size={16} /></article>
+                <article><Inbox size={18} /><span><strong>{t('读取收件箱')}</strong><small>{t('查看邮箱列表、邮件正文和用户主动打开的附件')}</small></span><Check size={16} /></article>
+                <article><AtSign size={18} /><span><strong>{t('已连接的第三方邮箱')}</strong><small>{t('读取已连接账号、文件夹和邮件，并在用户操作后请求同步')}</small></span><Check size={16} /></article>
                 <article><Bell size={18} /><span><strong>{t('新邮件通知')}</strong><small>{t('扩展在后台检查并提醒新邮件')}</small></span><Check size={16} /></article>
               </div>
               {user ? (

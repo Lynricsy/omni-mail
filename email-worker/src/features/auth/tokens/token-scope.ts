@@ -17,27 +17,45 @@ export const ANDROID_DEVICE_SCOPES = [
   'icloud:messages:read',
 ].join(' ')
 export const EXTENSION_DEVICE_SCOPES = [
+  'mail-notifications:read',
   'domains:read',
   'mailboxes:read',
   'mailboxes:create',
   'messages:read',
   'messages:mark-read',
+  'messages:attachments:read',
+  'messages:send',
+  'drafts:read',
+  'drafts:write',
   'icloud:accounts:read',
   'icloud:aliases:read',
   'icloud:aliases:create',
   'icloud:messages:read',
   'gmail:accounts:read',
   'gmail:messages:read',
+  'gmail:attachments:read',
+  'gmail:sync',
   'qq-mail:accounts:read',
   'qq-mail:messages:read',
+  'qq-mail:attachments:read',
+  'qq-mail:sync',
+  'qq-mail:messages:send',
   'microsoft:accounts:read',
   'microsoft:messages:read',
+  'microsoft:attachments:read',
+  'microsoft:folders:read',
+  'microsoft:sync',
   'naver-mail:accounts:read',
   'naver-mail:messages:read',
+  'naver-mail:attachments:read',
+  'naver-mail:sync',
   'yandex-mail:accounts:read',
   'yandex-mail:messages:read',
+  'yandex-mail:attachments:read',
+  'yandex-mail:sync',
   'linuxdo-mail:account:read',
   'linuxdo-mail:messages:read',
+  'linuxdo-mail:messages:send',
 ].join(' ')
 
 function hasScope(scopes: string, required: string): boolean {
@@ -67,6 +85,9 @@ export async function deviceScopesAllow(scopes: string, request: Request): Promi
   if (scopes === FULL_DEVICE_SCOPES) return true
   const requestMethod = request.method.toUpperCase()
   const path = new URL(request.url).pathname
+  if (requestMethod === 'GET' && path === '/api/mail-notifications') {
+    return hasScope(scopes, 'mail-notifications:read')
+  }
   if (requestMethod === 'GET' && path === '/api/domains') {
     return hasScope(scopes, 'domains:read')
   }
@@ -155,6 +176,13 @@ export async function deviceScopesAllow(scopes: string, request: Request): Promi
     path === '/api/gmail/messages'
     || /^\/api\/gmail\/accounts\/[^/]+\/messages\/[^/]+$/.test(path)
   )) return hasScope(scopes, 'gmail:messages:read')
+  if (requestMethod === 'GET'
+    && /^\/api\/gmail\/accounts\/[^/]+\/messages\/[^/]+\/attachments\/[^/]+$/.test(path)) {
+    return hasScope(scopes, 'gmail:attachments:read')
+  }
+  if (requestMethod === 'POST' && /^\/api\/gmail\/accounts\/[^/]+\/sync$/.test(path)) {
+    return hasScope(scopes, 'gmail:sync')
+  }
   if (requestMethod === 'GET' && path === '/api/qq-mail/accounts') {
     return hasScope(scopes, 'qq-mail:accounts:read')
   }
@@ -162,6 +190,16 @@ export async function deviceScopesAllow(scopes: string, request: Request): Promi
     path === '/api/qq-mail/messages'
     || /^\/api\/qq-mail\/accounts\/[^/]+\/messages\/[^/]+$/.test(path)
   )) return hasScope(scopes, 'qq-mail:messages:read')
+  if (requestMethod === 'GET'
+    && /^\/api\/qq-mail\/accounts\/[^/]+\/messages\/[^/]+\/attachments\/[^/]+$/.test(path)) {
+    return hasScope(scopes, 'qq-mail:attachments:read')
+  }
+  if (requestMethod === 'POST' && /^\/api\/qq-mail\/accounts\/[^/]+\/sync$/.test(path)) {
+    return hasScope(scopes, 'qq-mail:sync')
+  }
+  if (requestMethod === 'POST' && /^\/api\/qq-mail\/accounts\/[^/]+\/messages$/.test(path)) {
+    return hasScope(scopes, 'qq-mail:messages:send')
+  }
   if (requestMethod === 'GET' && path === '/api/microsoft/accounts') {
     return hasScope(scopes, 'microsoft:accounts:read')
   }
@@ -169,6 +207,16 @@ export async function deviceScopesAllow(scopes: string, request: Request): Promi
     path === '/api/microsoft/messages'
     || /^\/api\/microsoft\/accounts\/[^/]+\/messages\/[^/]+$/.test(path)
   )) return hasScope(scopes, 'microsoft:messages:read')
+  if (requestMethod === 'GET'
+    && /^\/api\/microsoft\/accounts\/[^/]+\/messages\/[^/]+\/attachments\/[^/]+$/.test(path)) {
+    return hasScope(scopes, 'microsoft:attachments:read')
+  }
+  if (requestMethod === 'GET' && /^\/api\/microsoft\/accounts\/[^/]+\/folders$/.test(path)) {
+    return hasScope(scopes, 'microsoft:folders:read')
+  }
+  if (requestMethod === 'POST' && /^\/api\/microsoft\/accounts\/[^/]+\/sync$/.test(path)) {
+    return hasScope(scopes, 'microsoft:sync')
+  }
   if (requestMethod === 'GET' && path === '/api/naver-mail/accounts') {
     return hasScope(scopes, 'naver-mail:accounts:read')
   }
@@ -176,6 +224,13 @@ export async function deviceScopesAllow(scopes: string, request: Request): Promi
     path === '/api/naver-mail/messages'
     || /^\/api\/naver-mail\/accounts\/[^/]+\/messages\/[^/]+$/.test(path)
   )) return hasScope(scopes, 'naver-mail:messages:read')
+  if (requestMethod === 'GET'
+    && /^\/api\/naver-mail\/accounts\/[^/]+\/messages\/[^/]+\/attachments\/[^/]+$/.test(path)) {
+    return hasScope(scopes, 'naver-mail:attachments:read')
+  }
+  if (requestMethod === 'POST' && /^\/api\/naver-mail\/accounts\/[^/]+\/sync$/.test(path)) {
+    return hasScope(scopes, 'naver-mail:sync')
+  }
   if (requestMethod === 'GET' && path === '/api/yandex-mail/accounts') {
     return hasScope(scopes, 'yandex-mail:accounts:read')
   }
@@ -183,6 +238,13 @@ export async function deviceScopesAllow(scopes: string, request: Request): Promi
     path === '/api/yandex-mail/messages'
     || /^\/api\/yandex-mail\/accounts\/[^/]+\/messages\/[^/]+$/.test(path)
   )) return hasScope(scopes, 'yandex-mail:messages:read')
+  if (requestMethod === 'GET'
+    && /^\/api\/yandex-mail\/accounts\/[^/]+\/messages\/[^/]+\/attachments\/[^/]+$/.test(path)) {
+    return hasScope(scopes, 'yandex-mail:attachments:read')
+  }
+  if (requestMethod === 'POST' && /^\/api\/yandex-mail\/accounts\/[^/]+\/sync$/.test(path)) {
+    return hasScope(scopes, 'yandex-mail:sync')
+  }
   if (path === '/api/linux-do-mail/account') {
     if (requestMethod === 'GET') return hasScope(scopes, 'linuxdo-mail:account:read')
     if (requestMethod === 'POST' || requestMethod === 'DELETE') {

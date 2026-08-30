@@ -1,5 +1,6 @@
 import { Check, ChevronDown } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { t, useLocale } from '../../src/shared/i18n'
 
 export interface PanelSelectOption {
   label: string
@@ -16,8 +17,10 @@ interface Props {
 }
 
 export function PanelSelect({ ariaLabel, disabled = false, id, onChange, options, value }: Props) {
+  useLocale()
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
+  const activeIndexRef = useRef(0)
   const rootRef = useRef<HTMLDivElement>(null)
   const selectedIndex = Math.max(0, options.findIndex((option) => option.value === value))
   const selectedOption = options[selectedIndex]
@@ -30,11 +33,16 @@ export function PanelSelect({ ariaLabel, disabled = false, id, onChange, options
     }
     document.addEventListener('pointerdown', closeOnOutsideClick)
     return () => document.removeEventListener('pointerdown', closeOnOutsideClick)
-  }, [open, selectedIndex])
+  }, [open])
 
   useEffect(() => {
     if (unavailable) setOpen(false)
   }, [unavailable])
+
+  function activate(index: number) {
+    activeIndexRef.current = index
+    setActiveIndex(index)
+  }
 
   function select(index: number) {
     const option = options[index]
@@ -48,23 +56,24 @@ export function PanelSelect({ ariaLabel, disabled = false, id, onChange, options
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault()
       setOpen(true)
-      setActiveIndex((current) => {
-        if (!open) return selectedIndex
-        return event.key === 'ArrowDown'
-          ? Math.min(current + 1, lastIndex)
-          : Math.max(current - 1, 0)
-      })
+      const current = activeIndexRef.current
+      activate(!open ? selectedIndex : event.key === 'ArrowDown'
+        ? Math.min(current + 1, lastIndex)
+        : Math.max(current - 1, 0))
       return
     }
     if (open && (event.key === 'Home' || event.key === 'End')) {
       event.preventDefault()
-      setActiveIndex(event.key === 'Home' ? 0 : lastIndex)
+      activate(event.key === 'Home' ? 0 : lastIndex)
       return
     }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
-      if (open) select(activeIndex)
-      else setOpen(true)
+      if (open) select(activeIndexRef.current)
+      else {
+        activate(selectedIndex)
+        setOpen(true)
+      }
       return
     }
     if (event.key === 'Escape' && open) {
@@ -88,12 +97,12 @@ export function PanelSelect({ ariaLabel, disabled = false, id, onChange, options
         aria-label={ariaLabel}
         disabled={unavailable}
         onClick={() => {
-          if (!open) setActiveIndex(selectedIndex)
+          if (!open) activate(selectedIndex)
           setOpen((current) => !current)
         }}
         onKeyDown={handleKeyDown}
       >
-        <span>{selectedOption?.label || '暂无可用选项'}</span>
+        <span>{selectedOption?.label || t('暂无可用选项')}</span>
         <ChevronDown size={15} aria-hidden="true" />
       </button>
       {open && (
@@ -107,7 +116,7 @@ export function PanelSelect({ ariaLabel, disabled = false, id, onChange, options
               aria-selected={option.value === value}
               key={option.value}
               onClick={() => select(index)}
-              onPointerEnter={() => setActiveIndex(index)}
+              onPointerEnter={() => activate(index)}
             >
               <span>{option.label}</span>
               {option.value === value && <Check size={14} aria-hidden="true" />}

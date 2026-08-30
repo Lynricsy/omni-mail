@@ -21,6 +21,7 @@ import { errorMessage } from '../../../shared/api/errorMessage'
 import { t } from '../../../shared/i18n'
 import { bulkMessages, type BulkMessageAction } from '../../messages/model/messageActions'
 import { useMailboxRefresh } from '../../../shared/hooks/useAutoRefresh'
+import { notificationDeepLink } from '../../../shared/mail/notificationDeepLink'
 
 const emptyCounts: MailCounts = { unread: 0, starred: 0, drafts: 0, sent: 0, trash: 0 }
 const emptyPage: PageInfo = { hasMore: false, nextCursor: null, limit: 30 }
@@ -75,6 +76,7 @@ export function useMailboxMessages({
   const [bulkLoading, setBulkLoading] = useState(false)
   const [pendingMailDelete, setPendingMailDelete] = useState<PendingMailDelete | null>(null)
   const messageRequestId = useRef(0)
+  const pendingDeepLink = useRef(notificationDeepLink('omnimail'))
   const detailRequestId = useRef(0)
   const detailController = useRef<AbortController | null>(null)
 
@@ -182,12 +184,22 @@ export function useMailboxMessages({
   }
 
   const loadMessagesForNavigation = useEffectEvent(() => loadMessages())
+  const selectDeepLinkMessage = useEffectEvent((message: MessageSummary) => selectMessage(message))
   useEffect(() => {
     clearSelectedMessage()
     setLoadingMore(false)
     setSelectedMessageIds(new Set())
     if (folder !== 'drafts') void loadMessagesForNavigation()
   }, [clearSelectedMessage, folder, searchQuery, scope])
+
+  useEffect(() => {
+    const link = pendingDeepLink.current
+    const message = link && folder === 'inbox'
+      ? messages.find(({ id }) => id === link.messageId) : undefined
+    if (!message) return
+    pendingDeepLink.current = null
+    void selectDeepLinkMessage(message)
+  }, [folder, messages])
 
   useEffect(() => () => {
     detailRequestId.current += 1

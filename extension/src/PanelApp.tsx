@@ -1,12 +1,12 @@
 import {
   AlertCircle,
   Check,
-  Inbox,
   MailPlus,
   Settings,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { OmniLogo } from '../../src/shared/ui/brand/OmniLogo'
+import { t, useLocale } from '../../src/shared/i18n'
 import type {
   AppConfig,
   ManagedDomain,
@@ -22,18 +22,18 @@ import {
 import { GenerateView } from './PanelGenerate'
 import { InboxView } from './PanelInbox'
 import { PanelScrollbar } from './PanelScrollbar'
+import { PanelInboxSourceNav } from './PanelInboxSourceNav'
 import { LoginView, NavButton, SettingsView } from './PanelViews'
 import {
   type AuthStatus,
   type ExtensionSettings,
   type InboxResult,
   type MailSourcesResult,
-  type ThemePreference,
   sendExtensionMessage,
 } from './protocol'
-import { setPanelTheme } from './theme'
 import { usePanelICloud } from './usePanelICloud'
 import { usePanelMailSources } from './usePanelMailSources'
+import { usePanelSettings } from './usePanelSettings'
 
 type View = 'generate' | 'inbox' | 'settings'
 
@@ -41,19 +41,22 @@ function errorText(error: unknown): string {
   return error instanceof Error ? error.message : '操作失败，请稍后重试。'
 }
 export function PanelApp() {
+  useLocale()
   const mainRef = useRef<HTMLElement>(null)
   const messageRequestId = useRef(0)
   const detailRequestId = useRef(0)
   const [view, setView] = useState<View>(() => location.hash === '#inbox' ? 'inbox' : 'generate')
   const [auth, setAuth] = useState<AuthStatus | null>(null)
-  const [settings, setSettings] = useState<ExtensionSettings>({
-    floatingEnabled: true,
-    theme: 'system',
-  })
+  const [notice, setNotice] = useState('')
+  const [error, setError] = useState('')
+  const settingsState = usePanelSettings({ onNotice: setNotice, onError: setError }); const { settings, setSettings } = settingsState
   const [config, setConfig] = useState<AppConfig | null>(null)
   const [mailboxes, setMailboxes] = useState<MailboxAddress[]>([])
   const [domains, setDomains] = useState<ManagedDomain[]>([])
   const [messages, setMessages] = useState<MessageSummary[]>([])
+  const [inboxPage, setInboxPage] = useState<InboxResult['page']>({
+    hasMore: false, nextCursor: null, limit: 30,
+  })
   const [selectedMailbox, setSelectedMailbox] = useState('')
   const [selectedMessage, setSelectedMessage] = useState<MessageDetail | null>(null)
   const [domain, setDomain] = useState('')
@@ -63,10 +66,9 @@ export function PanelApp() {
   const { apply: applySources, reset: resetSources } = sourceState
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [detailLoading, setDetailLoading] = useState(false)
-  const [notice, setNotice] = useState('')
-  const [error, setError] = useState('')
   const iCloud = usePanelICloud({
     active: (view === 'generate' && sourceState.generateSource === 'icloud')
       || (view === 'inbox' && sourceState.inboxSource === 'icloud'),
@@ -80,25 +82,41 @@ export function PanelApp() {
   const canGenerate = Boolean(auth?.user && (
     ['super_admin', 'admin'].includes(auth.user.role) || auth.user.canCreateMailboxes
   ))
+  const canSend = Boolean(auth?.user && (
+    ['super_admin', 'admin'].includes(auth.user.role) || auth.user.canReply
+  ))
   const currentMailbox = selectedMailbox || mailboxes.find((item) => item.isPrimary)?.address || ''
   const generateAddress = generatedAddress || currentMailbox
   const generateMessages = messages.filter((message) => message.mailboxAddress === generateAddress)
 
-  const loadMessages = useCallback(async (mailbox = selectedMailbox, quiet = false) => {
+  const loadMessages = useCallback(async (
+    mailbox = selectedMailbox,
+    quiet = false,
+    cursor?: string,
+  ) => {
     const requestId = ++messageRequestId.current
-    quiet ? setRefreshing(true) : setLoading(true)
+    if (cursor) setLoadingMore(true)
+    else if (quiet) setRefreshing(true)
+    else setLoading(true)
     setError('')
     try {
       const result = await sendExtensionMessage<InboxResult>({
-        type: 'api:messages', mailbox: mailbox || undefined,
+        type: 'api:messages', mailbox: mailbox || undefined, cursor,
       })
-      if (requestId === messageRequestId.current) setMessages(result.messages)
+      if (requestId === messageRequestId.current) {
+        setMessages((items) => cursor ? [
+          ...items,
+          ...result.messages.filter((message) => !items.some((item) => item.id === message.id)),
+        ] : result.messages)
+        setInboxPage(result.page)
+      }
     } catch (loadError) {
       if (requestId === messageRequestId.current) setError(errorText(loadError))
     } finally {
       if (requestId === messageRequestId.current) {
         setLoading(false)
         setRefreshing(false)
+        setLoadingMore(false)
       }
     }
   }, [selectedMailbox])
@@ -159,7 +177,7 @@ export function PanelApp() {
       }
     })
     return () => { active = false }
-  }, [loadAuthenticatedData])
+  }, [loadAuthenticatedData, setSettings])
 
   useEffect(() => {
     const handleAuthStorageChange = (
@@ -175,6 +193,7 @@ export function PanelApp() {
         setMailboxes([])
         setDomains([])
         setMessages([])
+        setInboxPage({ hasMore: false, nextCursor: null, limit: 30 })
         resetSources()
         setSelectedMessage(null)
         setLoading(false)
@@ -349,33 +368,6 @@ export function PanelApp() {
     }
   }
 
-  async function toggleFloating(enabled: boolean) {
-    setSettings((current) => ({ ...current, floatingEnabled: enabled }))
-    try {
-      await sendExtensionMessage({ type: 'settings:set-floating', enabled })
-      setNotice(enabled ? '已启用网页悬浮按钮' : '已关闭网页悬浮按钮')
-    } catch (settingsError) {
-      setSettings((current) => ({ ...current, floatingEnabled: !enabled }))
-      setError(errorText(settingsError))
-    }
-  }
-
-  async function changeTheme(theme: ThemePreference) {
-    const previous = settings.theme
-    setSettings((current) => ({ ...current, theme }))
-    setPanelTheme(theme)
-    try {
-      await sendExtensionMessage({ type: 'settings:set-theme', theme })
-      setNotice(theme === 'system'
-        ? '主题已设为跟随系统'
-        : '已切换为' + (theme === 'light' ? '亮色' : '暗色') + '主题')
-    } catch (settingsError) {
-      setSettings((current) => ({ ...current, theme: previous }))
-      setPanelTheme(previous)
-      setError(errorText(settingsError))
-    }
-  }
-
   if (!auth?.authenticated) {
     return <div className="panel-content login-scroll-shell">
       <main className="panel-main" ref={mainRef}>
@@ -390,13 +382,18 @@ export function PanelApp() {
       <nav className="panel-nav" aria-label="OmniMail 功能">
         <div className="panel-brand" title={config?.appName || 'OmniMail'}><OmniLogo size={23} /></div>
         <NavButton active={view === 'generate'} icon={<MailPlus />} label="生成" onClick={() => setView('generate')} />
-        <NavButton active={view === 'inbox'} icon={<Inbox />} label="收件" onClick={() => setView('inbox')} />
+        <PanelInboxSourceNav sources={sourceState.sources}
+          value={view === 'inbox' ? sourceState.inboxSource : null}
+          onChange={(source) => {
+            sourceState.setInboxSource(source)
+            setView('inbox')
+          }} />
         <NavButton active={view === 'settings'} icon={<Settings />} label="设置" onClick={() => setView('settings')} />
       </nav>
 
       <div className="panel-content">
         <main className="panel-main" ref={mainRef}>
-          {error && <div className="panel-alert" role="alert"><AlertCircle size={15} /><span>{error}</span><button type="button" onClick={() => setError('')}>关闭</button></div>}
+          {error && <div className="panel-alert" role="alert"><AlertCircle size={15} /><span>{error}</span><button type="button" onClick={() => setError('')}>{t('关闭')}</button></div>}
           <div className="panel-view" key={view}>
           {view === 'generate' && (
             <GenerateView
@@ -457,15 +454,17 @@ export function PanelApp() {
               selected={selectedMessage}
               loading={loading || detailLoading}
               refreshing={refreshing}
+              loadingMore={loadingMore}
+              page={inboxPage}
               iCloudEnabled={config?.iCloudEnabled ?? false}
               iCloudAuthorized={auth.iCloudAuthorized}
               iCloudAccounts={iCloud.accounts}
               iCloudAccountId={iCloud.accountId}
               iCloudAliases={iCloud.aliases}
               iCloudPreferredAlias={iCloud.selectedAlias}
+              canSend={canSend}
               iCloudLoadingAccounts={iCloud.loadingAccounts}
               iCloudLoadingAliases={iCloud.loadingAliases}
-              onSource={sourceState.setInboxSource}
               onOpenSourceWeb={sourceState.openWeb}
               onUpgradeAuthorization={() => void login({ apiOrigin: auth.apiOrigin })}
               onICloudAccount={(accountId) => void iCloud.selectAccount(accountId)}
@@ -473,6 +472,9 @@ export function PanelApp() {
               onICloudReauthorize={() => void login({ apiOrigin: auth.apiOrigin })}
               onMailbox={changeMailbox}
               onRefresh={() => loadMessages(selectedMailbox, true)}
+              onLoadMore={() => inboxPage.nextCursor
+                ? loadMessages(selectedMailbox, false, inboxPage.nextCursor)
+                : Promise.resolve()}
               onSelect={openMessage}
               onBack={() => { detailRequestId.current += 1; setSelectedMessage(null) }}
             />
@@ -481,8 +483,9 @@ export function PanelApp() {
             <SettingsView
               auth={auth}
               settings={settings}
-              onToggleFloating={toggleFloating}
-              onTheme={(theme) => void changeTheme(theme)}
+              onToggleFloating={(enabled) => void settingsState.toggleFloating(enabled)}
+              onTheme={(theme) => void settingsState.changeTheme(theme)}
+              onNotifications={(input) => void settingsState.changeNotifications(input)}
               onOpenWeb={() => void chrome.tabs.create({ url: auth.apiOrigin })}
               onLogout={logout}
             />

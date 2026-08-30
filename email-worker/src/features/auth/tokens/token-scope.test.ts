@@ -113,11 +113,39 @@ describe('device token scopes', () => {
   })
 
   it('allows only the APIs used by OmniMail Float', async () => {
+    await expect(deviceScopesAllow(
+      EXTENSION_DEVICE_SCOPES,
+      request('/api/mail-notifications?sources=icloud,linuxdo'),
+    )).resolves.toBe(true)
     await expect(deviceScopesAllow(EXTENSION_DEVICE_SCOPES, request('/api/domains'))).resolves.toBe(true)
     await expect(deviceScopesAllow(EXTENSION_DEVICE_SCOPES, request('/api/mailboxes'))).resolves.toBe(true)
     await expect(deviceScopesAllow(EXTENSION_DEVICE_SCOPES, request('/api/mailboxes', 'POST'))).resolves.toBe(true)
     await expect(deviceScopesAllow(EXTENSION_DEVICE_SCOPES, request('/api/messages'))).resolves.toBe(true)
     await expect(deviceScopesAllow(EXTENSION_DEVICE_SCOPES, request('/api/messages/message-1'))).resolves.toBe(true)
+    await expect(deviceScopesAllow(
+      EXTENSION_DEVICE_SCOPES,
+      request('/api/messages', 'POST'),
+    )).resolves.toBe(true)
+    await expect(deviceScopesAllow(
+      EXTENSION_DEVICE_SCOPES,
+      request('/api/messages/message-1/reply', 'POST'),
+    )).resolves.toBe(true)
+    await expect(deviceScopesAllow(
+      EXTENSION_DEVICE_SCOPES,
+      request('/api/drafts', 'POST'),
+    )).resolves.toBe(true)
+    await expect(deviceScopesAllow(
+      EXTENSION_DEVICE_SCOPES,
+      request('/api/drafts/draft-1/attachments', 'POST'),
+    )).resolves.toBe(true)
+    await expect(deviceScopesAllow(
+      EXTENSION_DEVICE_SCOPES,
+      request('/api/drafts/draft-1/send', 'POST'),
+    )).resolves.toBe(true)
+    await expect(deviceScopesAllow(
+      EXTENSION_DEVICE_SCOPES,
+      request('/api/messages/message-1/attachments/attachment-1'),
+    )).resolves.toBe(true)
     await expect(deviceScopesAllow(
       EXTENSION_DEVICE_SCOPES,
       request('/api/messages/message-1', 'PATCH', { isRead: true }),
@@ -170,11 +198,31 @@ describe('device token scopes', () => {
         request(path),
       ), path).resolves.toBe(true)
     }
+    const indexedReadingCapabilities: Array<[string, string]> = [
+      ['/api/gmail/accounts/gmail-1/sync', 'POST'],
+      ['/api/gmail/accounts/gmail-1/messages/message-1/attachments/part-1', 'GET'],
+      ['/api/qq-mail/accounts/qq-1/sync', 'POST'],
+      ['/api/qq-mail/accounts/qq-1/messages/message-1/attachments/part-1', 'GET'],
+      ['/api/microsoft/accounts/microsoft-1/sync', 'POST'],
+      ['/api/microsoft/accounts/microsoft-1/folders', 'GET'],
+      ['/api/microsoft/accounts/microsoft-1/messages/message-1/attachments/part-1', 'GET'],
+      ['/api/naver-mail/accounts/naver-1/sync', 'POST'],
+      ['/api/naver-mail/accounts/naver-1/messages/message-1/attachments/part-1', 'GET'],
+      ['/api/yandex-mail/accounts/yandex-1/sync', 'POST'],
+      ['/api/yandex-mail/accounts/yandex-1/messages/message-1/attachments/part-1', 'GET'],
+      ['/api/qq-mail/accounts/qq-1/messages', 'POST'],
+      ['/api/linux-do-mail/messages', 'POST'],
+    ]
+    for (const [path, method] of indexedReadingCapabilities) {
+      await expect(deviceScopesAllow(
+        EXTENSION_DEVICE_SCOPES,
+        request(path, method),
+      ), `${method} ${path}`).resolves.toBe(true)
+    }
   })
 
   it('denies administrative and destructive APIs to extension tokens', async () => {
     await expect(deviceScopesAllow(EXTENSION_DEVICE_SCOPES, request('/api/admin/users'))).resolves.toBe(false)
-    await expect(deviceScopesAllow(EXTENSION_DEVICE_SCOPES, request('/api/messages', 'POST'))).resolves.toBe(false)
     await expect(deviceScopesAllow(EXTENSION_DEVICE_SCOPES, request('/api/messages/message-1', 'DELETE'))).resolves.toBe(false)
     await expect(deviceScopesAllow(EXTENSION_DEVICE_SCOPES, request('/api/messages/message-1/raw'))).resolves.toBe(false)
     await expect(deviceScopesAllow(EXTENSION_DEVICE_SCOPES, request('/api/auth/devices'))).resolves.toBe(false)
@@ -182,32 +230,19 @@ describe('device token scopes', () => {
     await expect(deviceScopesAllow(EXTENSION_DEVICE_SCOPES, request('/api/icloud/aliases/alias-1', 'DELETE'))).resolves.toBe(false)
     await expect(deviceScopesAllow(EXTENSION_DEVICE_SCOPES, request('/api/icloud/aliases/preview', 'POST'))).resolves.toBe(false)
     await expect(deviceScopesAllow(EXTENSION_DEVICE_SCOPES, request('/api/icloud/accounts/icloud-1/cookies', 'PUT'))).resolves.toBe(false)
-    const indexedWritesAndAttachments: Array<[string, string]> = [
+    const indexedWrites: Array<[string, string]> = [
       ['/api/gmail/accounts', 'POST'],
-      ['/api/gmail/accounts/gmail-1/sync', 'POST'],
-      ['/api/gmail/accounts/gmail-1/messages/message-1/attachments/part-1', 'GET'],
       ['/api/qq-mail/accounts', 'POST'],
-      ['/api/qq-mail/accounts/qq-1/sync', 'POST'],
       ['/api/qq-mail/accounts/qq-1/identities', 'POST'],
-      ['/api/qq-mail/accounts/qq-1/messages', 'POST'],
-      ['/api/qq-mail/accounts/qq-1/messages/message-1/attachments/part-1', 'GET'],
       ['/api/microsoft/accounts', 'POST'],
-      ['/api/microsoft/accounts/microsoft-1/sync', 'POST'],
-      ['/api/microsoft/accounts/microsoft-1/folders', 'GET'],
-      ['/api/microsoft/accounts/microsoft-1/messages/message-1/attachments/part-1', 'GET'],
       ['/api/naver-mail/accounts', 'POST'],
-      ['/api/naver-mail/accounts/naver-1/sync', 'POST'],
-      ['/api/naver-mail/accounts/naver-1/messages/message-1/attachments/part-1', 'GET'],
       ['/api/yandex-mail/accounts', 'POST'],
-      ['/api/yandex-mail/accounts/yandex-1/sync', 'POST'],
-      ['/api/yandex-mail/accounts/yandex-1/messages/message-1/attachments/part-1', 'GET'],
       ['/api/linux-do-mail/account', 'POST'],
       ['/api/linux-do-mail/account', 'DELETE'],
       ['/api/linux-do-mail/account/verify', 'POST'],
       ['/api/linux-do-mail/account/credential', 'PUT'],
-      ['/api/linux-do-mail/messages', 'POST'],
     ]
-    for (const [path, method] of indexedWritesAndAttachments) {
+    for (const [path, method] of indexedWrites) {
       await expect(deviceScopesAllow(
         EXTENSION_DEVICE_SCOPES,
         request(path, method),
