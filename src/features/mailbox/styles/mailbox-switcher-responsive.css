@@ -1,0 +1,58 @@
+@media (max-width: 760px) {
+  .mailbox-scope-trigger[aria-expanded="true"] {
+    z-index: auto;
+  }
+
+  .mailbox-switcher__panel {
+    position: fixed;
+    top: auto;
+    right: 10px;
+    bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+    left: 10px;
+    width: auto;
+    max-height: calc(100vh - 98px - env(safe-area-inset-bottom, 0px));
+    max-height: calc(100svh - 98px - env(safe-area-inset-bottom, 0px));
+    border-radius: 20px;
+    transform: translateY(14px) scale(0.985);
+  }
+  .mailbox-switcher__panel.is-open {
+    transform: none;
+  }
+
+  .switcher-backdrop {
+    background: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mailbox-scope-trigger > svg,
+  .switcher-backdrop,
+  .mailbox-switcher__panel {
+    transition: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .mailbox-scope-trigger {
+    min-width: 130px;
+    max-width: 180px;
+  }
+
+  .mailbox-manager {
+    padding: 11px;
+  }
+
+  .mailbox-add-form > div {
+    grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1.2fr);
+  }
+
+  .mailbox-add-form .button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .managed-mailbox {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+}

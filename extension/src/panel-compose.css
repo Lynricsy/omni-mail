@@ -1,0 +1,393 @@
+.mailbox-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 10px;
+}
+
+.generate-page {
+  gap: 12px;
+  padding-block: 20px;
+}
+
+.mail-source-select {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+}
+
+.mail-source-select > span {
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.mail-source-select .panel-select-trigger {
+  height: 38px;
+}
+
+.generate-source-panel {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+}
+
+.generate-page .address-result {
+  gap: 3px;
+  padding: 12px;
+}
+
+.generate-page .address-result > div {
+  margin-top: 4px;
+}
+
+.generate-page .address-result button {
+  min-height: 33px;
+}
+
+.form-field,
+.panel-select {
+  min-width: 0;
+}
+
+.form-field > label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.form-field > label span {
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.panel-select {
+  position: relative;
+}
+
+.form-field input,
+.panel-select-trigger {
+  width: 100%;
+  height: 42px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.form-field input {
+  cursor: text;
+  font-size: 11px;
+}
+
+.form-field input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.icloud-generate-card {
+  display: grid;
+  gap: 12px;
+}
+
+.icloud-existing-card {
+  display: grid;
+  min-height: 267px;
+  gap: 12px;
+}
+
+.icloud-card-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--text-secondary);
+}
+
+.icloud-card-heading > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.icloud-card-heading strong {
+  color: var(--text);
+  font-size: 12px;
+}
+
+.icloud-card-heading span {
+  color: var(--text-tertiary);
+  font-size: 9px;
+}
+
+.icloud-existing-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.icloud-existing-actions button {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.icloud-existing-actions button:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.icloud-no-alias {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 11px;
+  background: var(--surface-muted);
+  color: var(--text-tertiary);
+  font-size: 10px;
+}
+
+.icloud-alias-skeleton {
+  display: grid;
+  min-height: 110px;
+  align-content: start;
+  gap: 12px;
+}
+
+.icloud-skeleton-field {
+  display: grid;
+  gap: 6px;
+}
+
+.icloud-skeleton-field span {
+  width: 88px;
+  height: 10px;
+}
+
+.icloud-skeleton-field i {
+  width: 100%;
+  height: 42px;
+}
+
+.icloud-skeleton-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.icloud-skeleton-actions i {
+  height: 38px;
+}
+
+.icloud-skeleton-field span,
+.icloud-skeleton-field i,
+.icloud-skeleton-actions i {
+  display: block;
+  border-radius: 10px;
+  background: linear-gradient(
+    100deg,
+    var(--surface-muted) 24%,
+    var(--surface-hover) 38%,
+    var(--surface-muted) 52%
+  );
+  background-size: 240% 100%;
+  animation: panel-skeleton-shimmer 1.25s ease-in-out infinite;
+}
+
+@keyframes panel-skeleton-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -140% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icloud-skeleton-field span,
+  .icloud-skeleton-field i,
+  .icloud-skeleton-actions i {
+    animation: none;
+  }
+}
+
+.icloud-create-toggle {
+  min-height: 40px;
+}
+
+.icloud-state-card,
+.icloud-loading-card {
+  display: grid;
+  min-height: 196px;
+  align-content: center;
+  justify-items: center;
+  gap: 7px;
+  text-align: center;
+}
+
+.icloud-state-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 3px;
+  border-radius: 13px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  place-items: center;
+}
+
+.icloud-state-card > strong {
+  font-size: 13px;
+}
+
+.icloud-state-card > p {
+  max-width: 28ch;
+  margin: 0 0 7px;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.icloud-state-card .secondary-button {
+  width: auto;
+  min-height: 38px;
+}
+
+.icloud-loading-card {
+  min-height: 154px;
+  color: var(--text-tertiary);
+  font-size: 10px;
+}
+
+.icloud-credential-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: -2px 0 0;
+  color: var(--text-tertiary);
+  font-size: 9px;
+}
+
+.icloud-web-link,
+.icloud-retry-link {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.icloud-web-link:hover,
+.icloud-retry-link:hover {
+  color: var(--text);
+}
+
+.icloud-retry-link {
+  min-height: 30px;
+  margin-top: -10px;
+  color: var(--text-tertiary);
+}
+
+.panel-select-trigger {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 650;
+  text-align: left;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.panel-select-trigger > span,
+.panel-select-option > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panel-select-trigger svg {
+  color: var(--text-tertiary);
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.panel-select-trigger:hover:not(:disabled),
+.panel-select.is-open .panel-select-trigger {
+  border-color: var(--line-strong);
+  background: var(--surface-hover);
+}
+
+.panel-select.is-open .panel-select-trigger {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.panel-select.is-open .panel-select-trigger svg {
+  color: var(--text);
+  transform: rotate(180deg);
+}
+
+.panel-select-menu {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  right: 0;
+  width: max(100%, 200px);
+  max-height: 218px;
+  padding: 5px;
+  overflow-y: auto;
+  border: 1px solid var(--line-strong);
+  border-radius: 13px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+  scrollbar-width: thin;
+}
+
+.panel-select-option {
+  display: grid;
+  width: 100%;
+  min-height: 34px;
+  grid-template-columns: minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.panel-select-option:hover,
+.panel-select-option.is-active {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.panel-select-option[aria-selected="true"] {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.panel-select-option svg {
+  color: var(--text);
+}

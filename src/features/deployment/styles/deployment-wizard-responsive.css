@@ -1,0 +1,109 @@
+@media (max-width: 680px) {
+  .deployment-backdrop {
+    align-items: end;
+    padding: 0;
+  }
+
+  .deployment-dialog {
+    width: 100%;
+    max-height: calc(100dvh - 12px);
+    border-radius: 22px 22px 0 0;
+  }
+
+  .deployment-dialog__header {
+    padding: 17px;
+  }
+
+  .deployment-dialog__header p:last-child {
+    display: none;
+  }
+
+  .deployment-steps {
+    gap: 5px;
+    padding: 9px 12px;
+  }
+
+  .deployment-steps button {
+    display: flex;
+    min-height: 48px;
+    justify-content: center;
+    padding: 6px;
+  }
+
+  .deployment-steps button > span:last-child small {
+    display: none;
+  }
+
+  .deployment-steps button > span:first-child {
+    width: 27px;
+    height: 27px;
+  }
+
+  .deployment-dialog__body {
+    min-height: 260px;
+    padding: 17px;
+  }
+
+  .deployment-dialog__footer {
+    padding: 12px 17px max(12px, env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 470px) {
+  .setup-card {
+    padding-inline: 24px;
+  }
+
+  .setup-readiness ul {
+    grid-template-columns: 1fr;
+  }
+
+  .deployment-dialog__symbol {
+    width: 42px;
+    height: 42px;
+  }
+
+  .deployment-dialog__header h2 {
+    font-size: 21px;
+  }
+
+  .deployment-steps button {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .deployment-steps button > span:last-child {
+    display: none;
+  }
+
+  .deployment-check {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .deployment-check__state {
+    grid-column: 2;
+    margin-top: -4px;
+  }
+
+  .deployment-dialog__footer {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .deployment-dialog__footer > .button,
+  .deployment-dialog__footer > div,
+  .deployment-dialog__footer > div .button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deployment-backdrop,
+  .deployment-dialog {
+    animation: none;
+  }
+
+  .deployment-steps button {
+    transition: none;
+  }
+}

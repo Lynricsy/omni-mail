@@ -1,0 +1,80 @@
+@media (max-width: 760px) {
+  .account-workspace__header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .account-workspace__header .user-header-actions {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-column: 1 / -1;
+    margin-top: 2px;
+  }
+
+  .account-workspace__header.is-stuck {
+    min-height: 64px;
+  }
+
+  .account-workspace__header.is-stuck .user-header-actions {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .account-settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 440px) {
+  .mfa-setup-code {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .mfa-setup-code > div {
+    justify-items: stretch;
+    width: 100%;
+  }
+
+  .account-summary-list {
+    padding-inline: 12px;
+  }
+
+  .account-summary-list > div {
+    min-height: 0;
+    padding-block: 11px;
+  }
+
+  .account-summary-list > .account-storage-summary {
+    grid-template-rows: auto auto 6px;
+    row-gap: 7px;
+    padding-block: 11px 13px;
+  }
+
+  .account-storage-usage {
+    justify-content: flex-start;
+  }
+
+  .account-preference {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .account-preference .theme-selector {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .account-preference .theme-selector button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .account-summary-list dd {
+    font-size: 12px;
+  }
+
+  .account-form .button {
+    width: 100%;
+  }
+}

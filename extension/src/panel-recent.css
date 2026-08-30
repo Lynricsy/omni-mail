@@ -1,0 +1,134 @@
+.recent-mail-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.recent-mail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 14px 11px;
+}
+
+.recent-mail-header > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.recent-mail-header span,
+.recent-mail-header small {
+  color: var(--text-tertiary);
+  font-size: 9px;
+}
+
+.recent-refresh-button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  place-items: center;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.recent-refresh-button:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.recent-mail-list {
+  border-top: 1px solid var(--line);
+}
+
+.recent-mail-list > button {
+  display: grid;
+  width: 100%;
+  min-height: 52px;
+  grid-template-columns: 6px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 9px 13px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-secondary);
+  text-align: left;
+  transition: background 160ms ease;
+}
+
+.recent-mail-list > button:last-child {
+  border-bottom: 0;
+}
+
+.recent-mail-list > button:hover {
+  background: var(--surface-hover);
+}
+
+.recent-mail-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.recent-mail-list .is-unread .recent-mail-dot {
+  background: var(--text);
+}
+
+.recent-mail-copy,
+.recent-mail-copy > span {
+  display: grid;
+  min-width: 0;
+}
+
+.recent-mail-copy {
+  gap: 2px;
+}
+
+.recent-mail-copy > span {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.recent-mail-copy strong,
+.recent-mail-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-mail-copy strong {
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 550;
+}
+
+.recent-mail-list .is-unread strong {
+  font-weight: 750;
+}
+
+.recent-mail-copy small,
+.recent-mail-copy time {
+  color: var(--text-tertiary);
+  font-size: 9px;
+}
+
+.recent-mail-empty {
+  display: flex;
+  min-height: 70px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--text-tertiary);
+  font-size: 10px;
+  text-align: center;
+}

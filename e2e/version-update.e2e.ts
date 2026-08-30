@@ -9,14 +9,14 @@ function json(route: Route, body: unknown, status = 200) {
   })
 }
 
-test('the super administrator can start an exact release update', async ({ page }) => {
-  let requestedVersion = ''
-  await page.emulateMedia({ reducedMotion: 'reduce' })
+test('a new version directs the administrator to update their fork on GitHub', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' })
   await page.addInitScript(() => {
     localStorage.setItem('omnimail.deployment-guide.v1', 'seen')
     localStorage.setItem('omnimail-locale', 'zh-CN')
   })
-  await page.route('**/api/**', async (route) => {
+  await page.route('**://*/api/**', async (route) => {
     const request = route.request()
     const path = new URL(request.url()).pathname
     if (path === '/api/config') return json(route, {
@@ -41,30 +41,20 @@ test('the super administrator can start an exact release update', async ({ page 
     })
     if (path === '/api/admin/version' && request.method() === 'GET') return json(route, {
       currentVersion: '0.1.0', latestVersion: '0.2.0', updateAvailable: true,
-      automaticUpdate: true, automaticUpdateReason: null, checkFailed: false,
-      checkedAt: Date.now(), releaseRepository: 'mibgb65-cloud/OmniMail',
+      checkFailed: false, checkedAt: Date.now(),
+      releaseRepository: 'mibgb65-cloud/OmniMail',
       releaseUrl: 'https://github.com/mibgb65-cloud/OmniMail/releases/latest',
     })
-    if (path === '/api/admin/version/update' && request.method() === 'POST') {
-      requestedVersion = request.postDataJSON().targetVersion
-      return json(route, { build: {
-        id: '11111111-1111-4111-8111-111111111111',
-        targetVersion: '0.2.0', state: 'queued',
-      } }, 202)
-    }
-    if (path === '/api/admin/version/update/11111111-1111-4111-8111-111111111111') {
-      return json(route, { build: {
-        id: '11111111-1111-4111-8111-111111111111', state: 'running',
-      } })
-    }
     return json(route, { error: `Unhandled test route: ${request.method()} ${path}` }, 404)
   })
 
   await page.goto('/admin/settings')
-  await page.getByRole('button', { name: '更新到 v0.2.0' }).click()
-  const confirmation = page.getByRole('alertdialog', { name: '确认系统更新' })
-  await expect(confirmation).toContainText('Release Tag 对应的确切提交')
-  await confirmation.getByRole('button', { name: '开始更新' }).click()
-  await expect.poll(() => requestedVersion).toBe('0.2.0')
-  await expect(page.getByText('正在构建并部署…')).toBeVisible()
+  await expect(page.getByRole('link', { name: '在 GitHub 查看 v0.2.0' })).toHaveAttribute(
+    'href',
+    'https://github.com/mibgb65-cloud/OmniMail/releases/latest',
+  )
+  await expect(page.getByText(
+    '请在自己的 Fork 页面选择 Sync fork → Update branch；同步后由 Cloudflare 重新部署。',
+  )).toBeVisible()
+  await expect(page.getByRole('button', { name: /更新到 v/ })).toHaveCount(0)
 })

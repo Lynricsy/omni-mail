@@ -1,0 +1,536 @@
+@media (max-width: 1120px) {
+  .mail-layout {
+    grid-template-columns: 78px minmax(310px, 350px) minmax(0, 1fr);
+  }
+
+  .mail-sidebar {
+    --sidebar-padding-inline: 10px;
+    align-items: center;
+    padding-inline: 10px;
+  }
+
+  .sidebar-brand {
+    padding-inline: 0;
+  }
+
+  .sidebar-brand .brand > span:last-child,
+  .folder-nav button span,
+  .folder-nav button small,
+  .admin-nav button span,
+  .account-nav button span,
+  .sidebar-account > div,
+  .sidebar-brand-links,
+  .account-avatar {
+    display: none;
+  }
+
+  .folder-nav {
+    width: 100%;
+  }
+
+  .folder-nav button,
+  .admin-nav button,
+  .account-nav button {
+    display: grid;
+    width: 48px;
+    height: 46px;
+    min-height: 46px;
+    grid-template-columns: 1fr;
+    margin-inline: auto;
+    place-items: center;
+    padding: 0;
+  }
+
+  .admin-nav {
+    width: 100%;
+    padding-top: 14px;
+  }
+
+  .account-nav {
+    width: 100%;
+  }
+
+  .sidebar-account {
+    display: block;
+    padding-inline: 0;
+  }
+
+  .sidebar-theme {
+    width: 78px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    margin-inline: -10px;
+    padding: 0 0 18px;
+  }
+
+  .sidebar-theme .language-quick-toggle {
+    width: 46px;
+    height: 32px;
+  }
+
+  .sidebar-theme .sidebar-notification-toggle {
+    width: 46px;
+    height: 32px;
+  }
+
+  .sidebar-theme .theme-selector {
+    grid-auto-flow: column;
+    gap: 0;
+    padding: 2px;
+  }
+
+  .sidebar-theme .theme-selector button {
+    width: 24px;
+    height: 28px;
+    border-radius: 7px;
+  }
+
+  .sidebar-theme .theme-selector svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .reader-content {
+    padding-inline: 28px;
+  }
+}
+
+@media (max-width: 760px) {
+  .mail-layout {
+    display: block;
+    height: 100vh;
+    height: 100dvh;
+    padding-bottom: 68px;
+    overflow: hidden;
+  }
+
+  .mail-sidebar {
+    position: fixed;
+    z-index: 50;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    width: 100%;
+    height: 68px;
+    flex-direction: row;
+    align-items: center;
+    gap: 2px;
+    padding: 7px 9px max(7px, env(safe-area-inset-bottom));
+    overflow: visible;
+    border-top: 1px solid var(--line);
+    border-right: 0;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    touch-action: manipulation;
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+
+  .mail-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sidebar-brand {
+    display: none;
+  }
+
+  .folder-nav {
+    display: grid;
+    width: auto;
+    min-width: 0;
+    flex: 6 1 0;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 2px;
+  }
+
+  .folder-nav.folder-count-5 {
+    flex-grow: 5;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .folder-nav.folder-count-7 {
+    flex-grow: 7;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0;
+  }
+
+  .mail-sidebar.folder-count-7 {
+    gap: 0;
+    padding-inline: 3px;
+  }
+
+  .folder-nav.folder-count-8 {
+    flex: 1 1 auto;
+    grid-template-columns: repeat(8, minmax(44px, 1fr));
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .folder-nav.folder-count-8::-webkit-scrollbar { display: none; }
+
+  .mail-sidebar.folder-count-8 {
+    gap: 0;
+    padding-inline: 2px;
+  }
+
+  .mail-sidebar.folder-count-8 .account-nav { flex: 0 0 44px; }
+
+  .folder-nav.folder-count-8 button span {
+    font-size: 8px;
+  }
+
+  .folder-nav button,
+  .admin-nav button,
+  .account-nav button {
+    display: flex;
+    width: 100%;
+    height: 52px;
+    min-height: 52px;
+    flex-direction: column;
+    gap: 2px;
+    justify-content: center;
+    border-radius: 11px;
+  }
+
+  .folder-nav button span {
+    display: block;
+    font-size: 9px;
+  }
+
+  .admin-nav {
+    position: absolute;
+    z-index: 2;
+    right: 9px;
+    bottom: calc(100% + 8px);
+    left: 9px;
+    display: grid;
+    width: auto;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 2px;
+    margin: 0;
+    padding: 7px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--surface) 96%, transparent);
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px) scale(0.985);
+    transform-origin: bottom center;
+    visibility: hidden;
+    transition: opacity 150ms ease-in, transform 180ms ease-in,
+      visibility 0s linear 180ms;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .admin-nav.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+    visibility: visible;
+    transition: opacity 180ms ease-out,
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1), visibility 0s;
+  }
+
+  .admin-nav button {
+    display: flex;
+    width: 100%;
+    height: 52px;
+    min-height: 52px;
+    flex-direction: column;
+    gap: 2px;
+    justify-content: center;
+    border-radius: 11px;
+  }
+
+  .admin-nav button span {
+    display: block;
+    font-size: 9px;
+  }
+
+  .account-nav {
+    display: grid;
+    width: auto;
+    min-width: 0;
+    flex: 1 1 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .account-nav-secondary {
+    display: none;
+  }
+
+  .account-nav button {
+    display: flex;
+    width: 100%;
+    height: 52px;
+    min-height: 52px;
+    flex-direction: column;
+    gap: 2px;
+    justify-content: center;
+    border-radius: 11px;
+  }
+
+  .account-nav button span {
+    display: block;
+    font-size: 9px;
+  }
+
+  .sidebar-navigation {
+    display: contents;
+  }
+
+  .account-nav button.is-active-mobile {
+    background: var(--accent);
+    color: var(--accent-contrast);
+  }
+
+  .admin-nav-toggle {
+    position: absolute;
+    z-index: 3;
+    bottom: calc(100% - 5px);
+    left: 50%;
+    display: grid;
+    width: 46px;
+    height: 30px;
+    padding: 0;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 15px 15px 8px 8px;
+    background: color-mix(in srgb, var(--surface) 96%, transparent);
+    color: var(--text-secondary);
+    cursor: pointer;
+    box-shadow: 0 -5px 16px color-mix(in srgb, #000 8%, transparent);
+    transform: translateX(-50%);
+    transition: color 180ms ease, background 180ms ease;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .admin-nav-toggle svg {
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .admin-nav-toggle[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+  }
+
+  .admin-nav-toggle.has-active-admin {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--accent-contrast);
+  }
+
+  .mail-sidebar .sidebar-account {
+    display: none;
+  }
+
+  .mail-sidebar .sidebar-theme {
+    display: none;
+  }
+
+  .folder-nav button small {
+    position: absolute;
+    display: block;
+    margin: -23px 0 0 20px;
+    padding: 1px 4px;
+    border-radius: 999px;
+    background: var(--danger);
+    color: #fff;
+    font-size: 8px;
+  }
+
+  .sidebar-account {
+    display: block;
+    flex: 0 0 auto;
+    margin: 0 0 0 4px;
+    padding: 0;
+    border: 0;
+  }
+
+  .list-pane {
+    width: 100%;
+    height: calc(100vh - 68px);
+    height: calc(100dvh - 68px);
+    border: 0;
+  }
+
+  .list-header {
+    min-height: 102px;
+  }
+
+  .mailbox-list-header {
+    min-height: 128px;
+    padding-top: max(20px, env(safe-area-inset-top));
+  }
+
+  .message-row__main {
+    min-height: 100px;
+    padding-left: 44px;
+  }
+
+  .reader-pane {
+    position: fixed;
+    z-index: 40;
+    inset: 0 0 68px;
+    display: none;
+    background: var(--surface);
+  }
+
+  .mail-layout.has-selection .reader-pane {
+    display: block;
+    animation: mobile-reader-in 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes mobile-reader-in {
+    from { opacity: 0.3; transform: translateX(18px); }
+  }
+
+  .mobile-back {
+    display: inline-grid;
+  }
+
+  .reader-toolbar {
+    min-height: 60px;
+    padding: max(8px, env(safe-area-inset-top)) 14px 8px;
+  }
+
+  .reader-content {
+    padding: 22px 14px 36px;
+    overflow-x: hidden;
+  }
+
+  .message-heading h1 {
+    margin-bottom: 21px;
+    font-size: clamp(24px, 7.5vw, 29px);
+  }
+
+  .sender-block {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .sender-block time {
+    grid-column: 2;
+    margin: 2px 0 0;
+  }
+
+  .plain-body {
+    padding: 21px 18px;
+  }
+
+  .plain-body,
+  .email-frame {
+    max-width: 100%;
+  }
+
+  .reply-composer {
+    position: fixed;
+    right: 10px;
+    bottom: 78px;
+    width: calc(100% - 20px);
+  }
+
+  .toast {
+    right: 50%;
+    bottom: 82px;
+    transform: translateX(50%);
+    white-space: nowrap;
+  }
+
+  .toast--update {
+    bottom: 136px;
+  }
+
+  @keyframes toast-in {
+    from { opacity: 0; transform: translate(50%, 8px); }
+  }
+}
+
+@media (max-width: 360px) {
+  .list-header:not(.mailbox-list-header) {
+    min-height: 154px;
+    flex-wrap: wrap;
+    align-content: flex-end;
+    gap: 10px;
+  }
+
+  .list-header:not(.mailbox-list-header) > div:first-child,
+  .list-header:not(.mailbox-list-header) > .list-header__actions {
+    width: 100%;
+  }
+
+  .list-header:not(.mailbox-list-header) > .list-header__actions {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 520px) {
+  .auth-page {
+    padding: 17px 16px 44px;
+  }
+
+  .auth-card {
+    margin-top: 39px;
+    padding: 31px 22px;
+    border-radius: var(--radius-lg);
+  }
+
+  .auth-card h1 {
+    font-size: 29px;
+  }
+
+  .auth-symbol {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+  }
+
+  .list-header {
+    padding-inline: 17px;
+  }
+
+  .search-field,
+  .list-error {
+    margin-inline: 12px;
+  }
+
+  .reader-toolbar .toolbar-button {
+    width: 38px;
+    padding: 0;
+    justify-content: center;
+    font-size: 0;
+  }
+
+  .message-footer-actions {
+    align-items: flex-start;
+    flex-direction: column-reverse;
+  }
+
+  .message-footer-actions .button {
+    width: 100%;
+  }
+
+  .attachment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reply-composer textarea {
+    min-height: 160px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

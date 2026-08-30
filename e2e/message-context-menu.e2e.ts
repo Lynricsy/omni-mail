@@ -7,7 +7,7 @@ test('desktop users can act on one message from its context menu', async ({ page
     localStorage.setItem('omnimail.deployment-guide.v1', 'seen')
     localStorage.setItem('omnimail-locale', 'zh-CN')
   })
-  await page.route('**/api/**', (route) => {
+  await page.route('**://*/api/**', (route) => {
     const request = route.request()
     const path = new URL(request.url()).pathname
     if (path === '/api/config') return route.fulfill({ json: {

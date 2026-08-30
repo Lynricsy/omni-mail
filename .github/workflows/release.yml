@@ -1,0 +1,62 @@
+name: Web Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing Web release tag, for example v0.2.6
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: web-release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+      RELEASE_NOTES_PATH: docs/releases/web/${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}.md
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+          fetch-depth: 0
+      - name: Verify tag is on main
+        run: |
+          git fetch origin main:refs/remotes/origin/main
+          git merge-base --is-ancestor "${RELEASE_TAG}^{commit}" origin/main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Verify release metadata
+        run: node scripts/prepare-release.mjs "$RELEASE_TAG"
+      - run: npm test
+      - run: npm run test:worker
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - run: npx wrangler deploy --dry-run
+      - name: Publish Web GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release edit "$RELEASE_TAG" \
+              --title "OmniMail $RELEASE_TAG" \
+              --notes-file "$RELEASE_NOTES_PATH"
+          else
+            gh release create "$RELEASE_TAG" \
+              --verify-tag \
+              --title "OmniMail $RELEASE_TAG" \
+              --notes-file "$RELEASE_NOTES_PATH"
+          fi

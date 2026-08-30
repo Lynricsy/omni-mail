@@ -1,0 +1,30 @@
+.icloud-email-frame,
+.icloud-plain-body {
+  display: block;
+  width: 100%;
+  min-height: 280px;
+  border: 0;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #262626;
+}
+
+.icloud-email-frame { overflow: hidden; }
+
+.icloud-plain-body {
+  padding: 28px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.85;
+}
+
+.icloud-plain-body a {
+  color: #1d1d1f;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .icloud-plain-body { padding: 21px 18px; font-size: 16px; }
+}

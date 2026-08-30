@@ -1,0 +1,132 @@
+.reply-attachments {
+  display: grid;
+  max-height: 126px;
+  gap: 7px;
+  overflow: hidden;
+  padding: 8px 15px 10px;
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-muted) 48%, transparent);
+}
+
+.reply-attachments > header,
+.reply-attachments > header strong,
+.reply-composer__tools,
+.reply-attach {
+  display: flex;
+  align-items: center;
+}
+
+.reply-attachments > header {
+  justify-content: space-between;
+  color: var(--text-tertiary);
+  font-size: 10px;
+}
+
+.reply-attachments > header strong,
+.reply-attach {
+  gap: 5px;
+}
+
+.reply-attachments > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  overflow: auto;
+}
+
+.reply-attachment {
+  display: inline-flex;
+  min-width: 0;
+  max-width: 245px;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 5px 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+
+.reply-attachment > svg {
+  flex: none;
+  color: var(--accent);
+}
+
+.reply-attachment > span {
+  display: grid;
+  min-width: 0;
+}
+
+.reply-attachment strong,
+.reply-attachment small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reply-attachment strong {
+  font-size: 11px;
+}
+
+.reply-attachment small {
+  color: var(--text-tertiary);
+  font-size: 9px;
+}
+
+.reply-attachment button,
+.reply-attach {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.reply-attachment button {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  place-items: center;
+  border-radius: 7px;
+  color: var(--text-tertiary);
+}
+
+.reply-attachment button:hover,
+.reply-attach:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.reply-composer__tools {
+  min-width: 0;
+  gap: 8px;
+}
+
+.reply-composer__tools > span {
+  color: var(--text-tertiary);
+  font-size: 9px;
+}
+
+.reply-attach {
+  min-height: 30px;
+  padding: 0 8px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.reply-attachment button:disabled,
+.reply-attach:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@media (max-width: 520px) {
+  .reply-composer__tools > span {
+    display: none;
+  }
+
+  .reply-attachment {
+    max-width: 100%;
+  }
+}

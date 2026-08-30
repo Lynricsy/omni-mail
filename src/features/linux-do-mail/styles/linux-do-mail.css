@@ -1,0 +1,280 @@
+.linuxdo-connect-dialog { width: min(460px, 100%); }
+.linuxdo-connect-dialog .icloud-form input { font-size: 16px; }
+.linuxdo-connect-dialog .inline-error { margin: 0; }
+.linuxdo-connect-dialog .button { min-height: 44px; }
+
+.linuxdo-password-field { position: relative; display: block; }
+.linuxdo-password-field input { padding-right: 48px; }
+.linuxdo-password-field button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.linuxdo-password-field button:hover { color: var(--text); }
+.linuxdo-password-field button:focus-visible { border-radius: 9px; outline: 2px solid var(--accent); outline-offset: -3px; }
+
+.linuxdo-connect-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.linuxdo-connect-note svg { flex: 0 0 auto; margin-top: 1px; color: var(--success); }
+
+.linuxdo-status {
+  display: inline-flex;
+  min-height: 22px;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--success-soft);
+  color: var(--success);
+  font-size: 9px;
+  font-weight: 680;
+  white-space: nowrap;
+}
+.linuxdo-status.is-error { background: var(--danger-soft); color: var(--danger); }
+
+.linuxdo-current-account {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+  margin: 0 0 4px;
+}
+.linuxdo-current-account span {
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  line-height: 1.2;
+}
+.linuxdo-current-account strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.linuxdo-folder-switch {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 3px;
+  margin: 0 16px 10px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+.linuxdo-folder-switch button {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 40px;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  transition: background 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+.linuxdo-folder-switch button:hover { color: var(--text); }
+.linuxdo-folder-switch button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.linuxdo-folder-switch button.is-active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.linuxdo-search-field { margin-bottom: 12px; }
+.linuxdo-search-field button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+.linuxdo-search-field button:disabled:hover {
+  background: transparent;
+  color: var(--text-tertiary);
+}
+
+.linuxdo-delivery-status {
+  display: inline-flex;
+  min-height: 20px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--warning-soft);
+  color: var(--warning);
+  font-size: 9px;
+  font-weight: 680;
+  white-space: nowrap;
+}
+.linuxdo-delivery-status.is-sent { background: var(--success-soft); color: var(--success); }
+.linuxdo-delivery-status.is-failed { background: var(--danger-soft); color: var(--danger); }
+.linuxdo-mail-view .message-row__subject { align-items: center; }
+
+.linuxdo-sent-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 0 0 18px;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, var(--line));
+  border-radius: 11px;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.linuxdo-sent-error > svg { flex: 0 0 auto; margin-top: 1px; }
+.linuxdo-sent-error > span { display: grid; min-width: 0; gap: 3px; }
+.linuxdo-sent-error strong { font-size: 12px; }
+.linuxdo-sent-error small { overflow-wrap: anywhere; font-size: 10px; line-height: 1.55; }
+
+.linuxdo-account-dialog { width: min(560px, 100%); }
+.linuxdo-account-dialog > header { margin-bottom: 16px; }
+.linuxdo-account-dialog > header .eyebrow {
+  margin: 0 0 5px;
+  color: var(--text-tertiary);
+  font-size: 9px;
+  letter-spacing: 0.13em;
+}
+.linuxdo-account-dialog .inline-error { margin: 0 0 12px; }
+
+.linuxdo-account-summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-muted);
+}
+.linuxdo-account-summary__icon,
+.linuxdo-account-section-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+.linuxdo-account-summary__icon { width: 38px; height: 38px; border-radius: 11px; }
+.linuxdo-account-summary > span:nth-child(2),
+.linuxdo-account-section-heading > span:last-child,
+.linuxdo-account-action > span,
+.linuxdo-account-danger > span { display: grid; min-width: 0; gap: 3px; }
+.linuxdo-account-summary strong,
+.linuxdo-account-section-heading strong,
+.linuxdo-account-action strong,
+.linuxdo-account-danger strong { overflow-wrap: anywhere; color: var(--text); font-size: 13px; }
+.linuxdo-account-summary small,
+.linuxdo-account-section-heading small,
+.linuxdo-account-action small,
+.linuxdo-account-danger small { color: var(--text-tertiary); font-size: 10px; line-height: 1.5; }
+
+.linuxdo-account-action,
+.linuxdo-account-danger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+.linuxdo-account-action .button,
+.linuxdo-account-danger .button { min-width: 112px; min-height: 44px; flex: 0 0 auto; }
+
+.linuxdo-account-credential {
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface-muted) 58%, var(--surface));
+}
+.linuxdo-account-section-heading { display: flex; align-items: center; gap: 9px; }
+.linuxdo-account-section-icon { width: 32px; height: 32px; border-radius: 9px; }
+.linuxdo-account-credential .linuxdo-password-field { display: block; }
+.linuxdo-account-credential .linuxdo-connect-note { font-size: 11px; }
+.linuxdo-account-credential > footer { justify-content: flex-start; }
+.linuxdo-account-credential > footer .button { min-height: 44px; }
+.linuxdo-account-danger { margin-top: 14px; }
+
+.linuxdo-compose-sender {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+.linuxdo-compose-sender > span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+}
+.linuxdo-compose-sender strong {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.linuxdo-compose-sender select {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 0 30px 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  outline: 0;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 620;
+}
+
+.linuxdo-compose-sender select:focus-visible { border-color: var(--line-strong); }
+
+@media (max-width: 760px) {
+  .linuxdo-account-dialog { width: 100%; }
+  .linuxdo-account-action,
+  .linuxdo-account-danger { align-items: stretch; flex-direction: column; gap: 10px; }
+  .linuxdo-account-action .button,
+  .linuxdo-account-danger .button { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .linuxdo-folder-switch button { transition: none; }
+}

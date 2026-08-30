@@ -2,7 +2,7 @@ import { expect, type Page, type Route, test } from '@playwright/test'
 import { beginMessageRowDrag, endMessageRowDrag, moveMessageRowDrag } from './drag-selection'
 import { message, reply, user } from './omnimail-fixtures'
 type MockState = {
-  messageRequests: number; conditionalRequests: number
+  messageRequests: number; conditionalRequests: number; sentCount: number
   failed: boolean
   version: number
   messageVisible: boolean
@@ -19,7 +19,7 @@ type MockState = {
 }
 function mockState(refreshInterval = 30, subject = message.subject): MockState {
   return {
-    messageRequests: 0,
+    messageRequests: 0, sentCount: 0,
     conditionalRequests: 0,
     failed: true,
     version: 1,
@@ -45,7 +45,7 @@ async function mockApp(page: Page, state = mockState()) {
     localStorage.setItem('omnimail.deployment-guide.v1', 'seen')
     localStorage.setItem('omnimail-locale', 'zh-CN')
   })
-  await page.route('**/api/**', async (route) => {
+  await page.route('**://*/api/**', async (route) => {
     const request = route.request()
     const url = new URL(request.url())
     const path = url.pathname
@@ -55,7 +55,7 @@ async function mockApp(page: Page, state = mockState()) {
       registrationMethod: 'password', linuxDoLoginEnabled: false,
       registrationDomainPolicy: { mode: 'blocklist', domains: [] },
       registrationProtectionReady: false, turnstileSiteKey: '', mailRefreshInterval: state.refreshInterval,
-      remoteImagesEnabled: false, unassignedMailEnabled: state.unassignedMailEnabled,
+      remoteImagesEnabled: false, unassignedMailEnabled: state.unassignedMailEnabled, iCloudWorkspaceEnabled: true, linuxDoMailWorkspaceEnabled: true,
       superAdminEmail: user.email,
       setupRequirements: { databaseReady: true, storageReady: true, queueReady: true,
         superAdminReady: true, setupTokenReady: false },
@@ -73,7 +73,7 @@ async function mockApp(page: Page, state = mockState()) {
     if (path === '/api/drafts' && request.method() === 'GET') return json(route, { drafts: [], limit: 5 })
     if (path === '/api/drafts' && request.method() === 'POST') { state.sentMessage = request.postDataJSON() as Record<string, string>; return json(route, { draft: { id: 'draft-1', ...state.sentMessage, createdAt: 1, updatedAt: 1, attachments: [] } }) }
     if (path === '/api/drafts/draft-1' && request.method() === 'PUT') { state.sentMessage = request.postDataJSON() as Record<string, string>; return json(route, { draft: { id: 'draft-1', ...state.sentMessage, createdAt: 1, updatedAt: 1, attachments: [] } }) }
-    if (path === '/api/drafts/draft-1/send' && request.method() === 'POST') { state.version += 1; return json(route, { message: { id: 'sent-1', status: 'queued' } }, 202) }
+    if (path === '/api/drafts/draft-1/send' && request.method() === 'POST') { state.sentCount += 1; state.version += 1; return json(route, { message: { id: `sent-${state.sentCount}`, status: 'queued' } }, 202) }
     if (path === '/api/messages/message-1' && request.method() === 'PATCH') {
       const input = request.postDataJSON() as { folder?: string }
       if (input.folder === 'trash') state.messageVisible = false
@@ -261,7 +261,7 @@ async function mockApp(page: Page, state = mockState()) {
     if (path === '/api/admin/invites/invite-1/revoke' && request.method() === 'PATCH') {
       return json(route, { ok: true })
     }
-    if (path === '/api/admin/version') return json(route, { currentVersion: '0.1.0', latestVersion: '0.2.0', updateAvailable: true, automaticUpdate: false, automaticUpdateReason: 'not_configured', checkFailed: false, checkedAt: Date.now(), releaseUrl: 'https://github.com/mibgb65-cloud/OmniMail/releases/latest', releaseRepository: 'mibgb65-cloud/OmniMail' })
+    if (path === '/api/admin/version') return json(route, { currentVersion: '0.1.0', latestVersion: '0.2.0', updateAvailable: true, checkFailed: false, checkedAt: Date.now(), releaseUrl: 'https://github.com/mibgb65-cloud/OmniMail/releases/latest', releaseRepository: 'mibgb65-cloud/OmniMail' })
     return json(route, { error: `Unhandled test route: ${request.method()} ${path}` }, 500)
   })
   return state
@@ -277,7 +277,7 @@ test('reselecting the inbox quietly refreshes without hiding the list', async ({
   await expect(panel).toHaveCount(0)
   await expect(page.getByText('Welcome to OmniMail')).toBeVisible()
   const requestsBeforeReselect = state.messageRequests
-  await page.getByRole('button', { name: '收件箱' }).click()
+  await page.getByRole('button', { name: '收件箱', exact: true }).click()
   await expect.poll(() => state.messageRequests).toBeGreaterThan(requestsBeforeReselect)
   await expect(page.getByText('Welcome to OmniMail')).toBeVisible()
   await expect(page.getByText('正在读取邮件')).toHaveCount(0)
@@ -319,14 +319,14 @@ test('users can compose and send a new message', async ({ page }) => {
   const from = dialog.getByRole('combobox', { name: '发件人' }); await expect(from).toContainText('inbox@example.com')
   await from.click(); const otherMailbox = dialog.getByRole('option', { name: /support@other\.example/ })
   await expect(otherMailbox).toBeVisible(); await page.keyboard.press('ArrowDown'); await page.keyboard.press('Enter')
-  await expect(dialog.getByLabel('收件人')).toHaveCSS('border-top-width', '0px')
-  await dialog.getByLabel('收件人').fill('friend@example.net')
+  const recipient = dialog.getByRole('textbox', { name: '收件人', exact: true }); await expect(recipient).toHaveCSS('border-top-width', '0px')
+  await recipient.fill('friend@example.net'); await recipient.press('Enter'); await recipient.fill('team@example.org'); await recipient.press('Enter'); await expect(dialog.getByText('team@example.org', { exact: true })).toBeVisible()
   await dialog.getByLabel('主题').fill('Hello from OmniMail')
   await dialog.getByLabel('邮件正文').fill('This is a new message.')
   await dialog.getByRole('button', { name: '发送邮件' }).click()
   await expect(dialog).toBeHidden(); expect(state.sentMessage).toMatchObject({ mailboxAddress: 'support@other.example',
-    to: 'friend@example.net', subject: 'Hello from OmniMail', text: 'This is a new message.' })
-  await expect(page.getByRole('status')).toHaveText('邮件已进入发送队列')
+    to: 'friend@example.net, team@example.org', subject: 'Hello from OmniMail', text: 'This is a new message.' })
+  await expect(page.getByRole('status').filter({ hasText: '邮件已进入发送队列' })).toHaveText('邮件已进入发送队列'); await page.getByRole('button', { name: '新建邮件' }).click(); const secondDialog = page.getByRole('dialog', { name: '新建邮件' }); await secondDialog.getByRole('textbox', { name: '收件人', exact: true }).fill('second@example.net'); await secondDialog.getByLabel('主题').fill('Second message'); await secondDialog.getByLabel('邮件正文').fill('Second body'); await secondDialog.getByRole('button', { name: '发送邮件' }).click(); await expect(secondDialog).toBeHidden(); expect(state.sentCount).toBe(2); await expect(page.locator('#root')).not.toBeEmpty()
 })
 test('a user with an empty mailbox allowance is prompted to choose an address', async ({ page }) => {
   const state = mockState()
@@ -400,8 +400,8 @@ test('bulk controls remain usable at common responsive widths', async ({ page })
   await list.hover(); expect(await list.evaluate((element) => element.clientWidth)).toBe(layout.width)
   await expect.poll(() => list.evaluate((element) => getComputedStyle(element).scrollbarColor)).not.toBe(layout.scrollbar)
   await page.locator('.list-header').hover(); await list.evaluate((element) => { element.scrollTop = 80 })
-  await expect(list).toHaveClass(/is-scrollbar-active/)
-  const [idleHeight, requestsBefore] = [await toolbar.evaluate((element) => element.getBoundingClientRect().height), state.messageRequests]
+  await expect(list).toHaveClass(/is-scrollbar-active/); await page.getByRole('button', { name: '回到列表顶部：收件箱' }).click()
+  await expect.poll(() => list.evaluate((element) => element.scrollTop)).toBe(0); const [idleHeight, requestsBefore] = [await toolbar.evaluate((element) => element.getBoundingClientRect().height), state.messageRequests]
   await expect(page.locator('.message-row__check')).toHaveCount(12)
   await page.getByRole('button', { name: '批量操作' }).click()
   await expect.poll(() => toolbar.evaluate((element) => element.getBoundingClientRect().height)).toBe(idleHeight)
@@ -410,7 +410,7 @@ test('bulk controls remain usable at common responsive widths', async ({ page })
   for (const width of [320, 375, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 })
     await expect(page.getByRole('button', { name: '移入垃圾箱' })).toBeVisible(); expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true)
-    if (width === 375) expect(await page.locator('.mail-sidebar').evaluate((nav) => [nav.scrollWidth <= nav.clientWidth, nav.querySelectorAll('.folder-nav > button, .account-nav > button').length])).toEqual([true, 6])
+    if (width === 375) expect(await page.locator('.mail-sidebar').evaluate((nav) => [nav.scrollWidth <= nav.clientWidth, nav.querySelectorAll('.folder-nav > button, .account-nav > button').length])).toEqual([true, 8])
   }
 })
 test('long subjects wrap to two stable lines without horizontal overflow', async ({ page }) => {
@@ -497,7 +497,7 @@ test('administrators can review usage estimates and retry failed mail', async ({
   await mockApp(page)
   await page.goto('/')
   await page.getByRole('button', { name: '统计' }).click()
-  await expect(page.getByRole('heading', { name: 'Cloudflare 免费额度参考' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Cloudflare 免费额度参考' })).toBeVisible(); const trendPoint = page.locator('.statistics-point').last(); await expect(trendPoint).toHaveAttribute('tabindex', '0'); await trendPoint.scrollIntoViewIfNeeded(); await expect(trendPoint).toBeInViewport(); await trendPoint.hover(); const trendTooltip = page.locator('.omni-tooltip'); await expect(trendTooltip).toHaveAttribute('data-state', 'open'); await expect(trendTooltip).toContainText('1 封')
   await expect(page.getByText('Broken MIME')).toBeVisible()
   await page.getByRole('button', { name: '重新处理' }).click()
   await expect(page.getByText('当前没有失败邮件')).toBeVisible()
@@ -507,7 +507,7 @@ test('workspace navigation has durable URLs and browser history', async ({ page 
   await page.goto('/')
   const mailTransition = page.locator('.page-content-enter'); await expect(mailTransition).toHaveCSS('animation-name', 'page-content-settle')
   expect(await mailTransition.evaluate(() => [...document.styleSheets].flatMap((sheet) => [...sheet.cssRules]).filter((rule): rule is CSSKeyframesRule => rule instanceof CSSKeyframesRule && rule.name === 'page-content-settle').every((rule) => [...rule.cssRules].every((frame) => !frame.style.opacity)))).toBe(true)
-  await expect(page.locator('.message-list')).toHaveCSS('animation-name', 'none')
+  const firstMessage = page.locator('.message-row').first(); await expect(firstMessage).toHaveCSS('animation-name', 'message-row-settle'); await page.emulateMedia({ reducedMotion: 'reduce' }); await expect(firstMessage).toHaveCSS('animation-name', 'none'); await page.emulateMedia({ reducedMotion: 'no-preference' })
   await expect(page).toHaveURL(/\/mail\/inbox$/)
   await page.getByRole('button', { name: '用户' }).click()
   await expect(page.locator('.admin-workspace')).toHaveCSS('animation-name', 'page-content-settle')
@@ -596,5 +596,5 @@ test('administrators can enable unassigned mail from system settings', async ({ 
   await page.getByRole('checkbox', { name: '开启无人收件' }).click()
   await expect.poll(() => state.unassignedMailEnabled).toBe(true)
   await expect(page.getByText('无人收件已开启')).toBeVisible()
-  await expect(page.getByText('发现新版本 v0.2.0')).toBeVisible()
+  await expect(page.getByRole('main').getByText('发现新版本 v0.2.0')).toBeVisible()
 })

@@ -1,0 +1,167 @@
+import { localized as l, type ApiEndpoint } from './apiCatalogTypes'
+
+export const mailboxEndpoints: ApiEndpoint[] = [
+  {
+    method: 'GET', path: '/api/domains', group: 'mailboxes', auth: 'authenticated',
+    title: l('读取可用收件域名', 'List available receiving domains'),
+    description: l('返回当前实例中的域名及其启用状态和邮箱数量。', 'Return instance domains with active state and mailbox counts.'),
+    request: 'No parameters', response: '200 · { domains }',
+  },
+  {
+    method: 'GET', path: '/api/mailboxes', group: 'mailboxes', auth: 'authenticated',
+    title: l('列出当前用户邮箱', 'List current-user mailboxes'),
+    description: l('返回当前用户可见的邮箱地址、主邮箱和启用状态。', 'Return visible mailbox addresses, the primary mailbox, and active state.'),
+    request: 'No parameters', response: '200 · { mailboxes }',
+  },
+  {
+    method: 'POST', path: '/api/mailboxes', group: 'mailboxes', auth: 'authenticated',
+    title: l('创建邮箱地址', 'Create a mailbox address'),
+    description: l('在启用域名下创建地址；受角色权限、邮箱上限和地址规则限制。', 'Create an address on an active domain, subject to role, quota, and address rules.'),
+    request: 'JSON · address', response: '200/201 · { mailbox }',
+    exampleBody: { address: 'owner@example.com' },
+  },
+  {
+    method: 'PATCH', path: '/api/mailboxes/:address', group: 'mailboxes', auth: 'authenticated',
+    title: l('启停邮箱或设为主邮箱', 'Enable, disable, or make a mailbox primary'),
+    description: l('更新拥有的邮箱地址；停用或设主地址时会执行安全约束。', 'Update an owned mailbox while enforcing disable and primary-address safeguards.'),
+    request: 'Path · address; JSON · isActive? or isPrimary?', response: '200 · { mailbox }',
+    exampleBody: { isPrimary: true },
+  },
+  {
+    method: 'DELETE', path: '/api/mailboxes/:address', group: 'mailboxes', auth: 'authenticated',
+    title: l('删除非主邮箱', 'Delete a non-primary mailbox'),
+    description: l('立即隐藏非主邮箱，并启动邮件、草稿和附件的异步清理。', 'Hide a non-primary mailbox immediately and start asynchronous mail, draft, and attachment cleanup.'),
+    request: 'Path · address', response: '202 · { ok: true }',
+  },
+]
+
+export const messageEndpoints: ApiEndpoint[] = [
+  {
+    method: 'GET', path: '/api/messages', group: 'messages', auth: 'authenticated',
+    title: l('查询邮件列表', 'Query messages'),
+    description: l('按文件夹、搜索词、邮箱或域名筛选，并使用不透明游标分页。', 'Filter by folder, query, mailbox, or domain and paginate with an opaque cursor.'),
+    request: 'Query · folder, q?, mailbox?, domain?, limit=1..100?, cursor?, version?',
+    response: '200 · { messages, counts, page, version, unchanged }',
+    examplePath: '/api/messages?folder=inbox&limit=30',
+    notes: [l('翻页期间必须保持筛选参数不变；cursor 不能解析或修改。', 'Keep filters unchanged while paging; do not parse or modify cursor.')],
+  },
+  {
+    method: 'POST', path: '/api/messages', group: 'messages', auth: 'authenticated',
+    title: l('主动发送邮件', 'Send a message'),
+    description: l('通过当前域名配置的发信服务发送，并把结果保存到已发送。', 'Send through the provider configured for the domain and save the result to Sent.'),
+    request: 'JSON · mailboxAddress, to, subject, text, idempotencyKey', response: '200/202 · { message }',
+    exampleBody: { mailboxAddress: 'owner@example.com', to: 'friend@example.net', subject: 'Hello', text: 'Message body', idempotencyKey: 'request_12345678' },
+    notes: [l('需要发信权限；相同 idempotencyKey 不会重复投递或重复计入限速。', 'Requires send permission; the same idempotencyKey is not delivered or rate-counted twice.')],
+  },
+  {
+    method: 'PATCH', path: '/api/messages/bulk', group: 'messages', auth: 'authenticated',
+    title: l('批量更新邮件', 'Bulk-update messages'),
+    description: l('一次更新最多 50 封当前用户邮件的已读、星标、文件夹或删除状态。', 'Update read, star, folder, or deletion state for up to 50 current-user messages.'),
+    request: 'JSON · ids[1..50], action=read|unread|star|unstar|trash|restore|delete', response: '200 · { ok, updatedCount }',
+    exampleBody: { ids: ['message_1', 'message_2'], action: 'read' },
+  },
+  {
+    method: 'GET', path: '/api/messages/:id', group: 'messages', auth: 'authenticated',
+    title: l('读取邮件详情', 'Read message details'),
+    description: l('读取正文、附件元数据和按时间排序的会话摘要。', 'Read message content, attachment metadata, and chronological thread summaries.'),
+    request: 'Path · id', response: '200 · { message, thread }',
+  },
+  {
+    method: 'PATCH', path: '/api/messages/:id', group: 'messages', auth: 'authenticated',
+    title: l('更新邮件状态', 'Update message state'),
+    description: l('修改已读、星标或文件夹状态，移入垃圾箱时计算清理日期。', 'Change read, star, or folder state and calculate purge time when moving to Trash.'),
+    request: 'Path · id; JSON · isRead?, isStarred?, folder=inbox|sent|trash?', response: '200 · { ok: true }',
+    exampleBody: { isRead: true, isStarred: true },
+  },
+  {
+    method: 'DELETE', path: '/api/messages/:id', group: 'messages', auth: 'authenticated',
+    title: l('永久删除垃圾箱邮件', 'Permanently delete a Trash message'),
+    description: l('永久删除当前用户垃圾箱中的邮件、原文、正文和附件。', 'Permanently delete a current-user Trash message, raw source, body, and attachments.'),
+    request: 'Path · id', response: '200 · { ok: true }',
+    notes: [l('只有已经位于垃圾箱的邮件可以永久删除。', 'Only messages already in Trash can be permanently deleted.')],
+  },
+  {
+    method: 'GET', path: '/api/messages/:messageId/attachments/:attachmentId', group: 'messages', auth: 'authenticated',
+    title: l('下载或预览附件', 'Download or preview an attachment'),
+    description: l('读取当前用户邮件附件；preview=1 时使用受限内联响应。', 'Read a current-user attachment; preview=1 returns a restricted inline response.'),
+    request: 'Path · messageId, attachmentId; Query · preview=1?', response: '200 · attachment bytes',
+    examplePath: '/api/messages/:messageId/attachments/:attachmentId?preview=1', outputFile: 'attachment.bin',
+  },
+  {
+    method: 'GET', path: '/api/messages/:id/raw', group: 'messages', auth: 'authenticated',
+    title: l('下载原始 EML', 'Download raw EML'),
+    description: l('下载当前用户邮件的原始 RFC 822 内容。', 'Download the original RFC 822 source for a current-user message.'),
+    request: 'Path · id', response: '200 · message/rfc822', outputFile: 'message.eml',
+  },
+  {
+    method: 'POST', path: '/api/messages/:id/reply', group: 'messages', auth: 'authenticated',
+    title: l('回复邮件', 'Reply to a message'),
+    description: l('在线程内回复；可使用 JSON，带附件时改用 multipart/form-data。', 'Reply in-thread using JSON, or multipart/form-data when attachments are included.'),
+    request: 'JSON · text, idempotencyKey; or multipart · text, idempotencyKey, attachments[]', response: '200/202 · { message }',
+    exampleBody: { text: 'Thanks!', idempotencyKey: 'reply_12345678' },
+    notes: [l('需要回信权限；最多 5 个附件，单个 5 MiB、合计 10 MiB。', 'Requires reply permission; up to 5 attachments, 5 MiB each and 10 MiB total.')],
+  },
+  {
+    method: 'POST', path: '/api/messages/:id/translation', group: 'messages', auth: 'authenticated',
+    title: l('翻译邮件正文', 'Translate message content'),
+    description: l('使用 Workers AI 翻译正文并缓存翻译结果。', 'Translate message content with Workers AI and cache the result.'),
+    request: 'Path · id; JSON · targetLanguage, sourceLanguage?', response: '200 · { translation }',
+    exampleBody: { targetLanguage: 'en', sourceLanguage: 'zh' },
+    notes: [l('账户必须由管理员启用翻译权限。', 'The account must have translation permission enabled by an administrator.')],
+  },
+]
+
+export const draftEndpoints: ApiEndpoint[] = [
+  {
+    method: 'GET', path: '/api/drafts', group: 'drafts', auth: 'authenticated',
+    title: l('列出草稿', 'List drafts'),
+    description: l('读取当前用户保留的服务端草稿摘要。', 'Read server-side draft summaries retained for the current user.'),
+    request: 'No parameters', response: '200 · { drafts, limit }',
+  },
+  {
+    method: 'POST', path: '/api/drafts', group: 'drafts', auth: 'authenticated',
+    title: l('创建草稿', 'Create a draft'),
+    description: l('创建服务端草稿，超过角色上限时自动清理最早草稿。', 'Create a server-side draft and prune the oldest draft when the role limit is exceeded.'),
+    request: 'JSON · mailboxAddress, to, subject, text', response: '200 · { draft }',
+    exampleBody: { mailboxAddress: 'owner@example.com', to: 'friend@example.net', subject: 'Draft subject', text: 'Draft body' },
+  },
+  {
+    method: 'GET', path: '/api/drafts/:id', group: 'drafts', auth: 'authenticated',
+    title: l('读取草稿详情', 'Read a draft'),
+    description: l('读取拥有的草稿及附件元数据。', 'Read an owned draft and its attachment metadata.'),
+    request: 'Path · id', response: '200 · { draft }',
+  },
+  {
+    method: 'PUT', path: '/api/drafts/:id', group: 'drafts', auth: 'authenticated',
+    title: l('保存草稿', 'Save a draft'),
+    description: l('完整保存发件邮箱、收件人、主题和正文。', 'Replace the sending mailbox, recipient, subject, and body.'),
+    request: 'Path · id; JSON · mailboxAddress, to, subject, text', response: '200 · { draft }',
+    exampleBody: { mailboxAddress: 'owner@example.com', to: 'friend@example.net', subject: 'Updated subject', text: 'Updated body' },
+  },
+  {
+    method: 'DELETE', path: '/api/drafts/:id', group: 'drafts', auth: 'authenticated',
+    title: l('丢弃草稿', 'Discard a draft'),
+    description: l('删除拥有的草稿及其全部附件对象。', 'Delete an owned draft and all of its attachment objects.'),
+    request: 'Path · id', response: '200 · { ok: true }',
+  },
+  {
+    method: 'POST', path: '/api/drafts/:id/attachments', group: 'drafts', auth: 'authenticated',
+    title: l('上传草稿附件', 'Upload a draft attachment'),
+    description: l('以 multipart/form-data 上传一个附件并计入用户存储配额。', 'Upload one attachment as multipart/form-data and count it against user storage.'),
+    request: 'multipart/form-data · file', response: '201 · { attachment }',
+    formFields: { file: '@./document.pdf' },
+  },
+  {
+    method: 'DELETE', path: '/api/drafts/:id/attachments/:attachmentId', group: 'drafts', auth: 'authenticated',
+    title: l('删除草稿附件', 'Delete a draft attachment'),
+    description: l('删除拥有的草稿附件并释放存储空间。', 'Delete an owned draft attachment and release storage.'),
+    request: 'Path · id, attachmentId', response: '200 · { ok: true }',
+  },
+  {
+    method: 'POST', path: '/api/drafts/:id/send', group: 'drafts', auth: 'authenticated',
+    title: l('发送草稿', 'Send a draft'),
+    description: l('幂等发送草稿和附件，成功入队后删除草稿。', 'Idempotently send the draft and attachments, then delete the draft after queueing.'),
+    request: 'Path · id; JSON · idempotencyKey', response: '200/202 · { message }',
+    exampleBody: { idempotencyKey: 'draft_12345678' },
+  },
+]

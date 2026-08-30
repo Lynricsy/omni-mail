@@ -1,24 +1,68 @@
 {
-  "name": "omni-mail",
-  "version": "0.1.3",
+  "name": "omnimail",
+  "version": "0.10.2",
   "private": true,
   "type": "module",
   "description": "A small, self-hosted webmail deployed as one Cloudflare Worker with Static Assets, D1, R2, Queues, and Resend.",
+  "cloudflare": {
+    "bindings": {
+      "SETUP_TOKEN": {
+        "description": "Required one-time token for creating the first super administrator. Use at least 32 random characters and remove it after setup."
+      },
+      "SUPER_ADMIN_EMAIL": {
+        "description": "Required email address of the super administrator, for example owner@example.com."
+      },
+      "ICLOUD_CREDENTIALS_KEY": {
+        "description": "Optional. At least 32 random UTF-8 bytes for encrypting iCloud cookies and app-specific passwords."
+      },
+      "LINUX_DO_MAIL_CREDENTIALS_KEY": {
+        "description": "Optional. At least 32 random UTF-8 bytes for encrypting Linux DO Mail passwords or authentication tokens."
+      },
+      "GMAIL_CREDENTIALS_KEY": {
+        "description": "Optional. At least 32 random UTF-8 bytes for encrypting Gmail app passwords."
+      },
+      "QQ_MAIL_CREDENTIALS_KEY": {
+        "description": "Optional. At least 32 random UTF-8 bytes for encrypting QQ Mail authorization codes."
+      },
+      "NAVER_MAIL_CREDENTIALS_KEY": {
+        "description": "Optional. At least 32 random UTF-8 bytes for encrypting NAVER Mail app-specific passwords."
+      },
+      "MICROSOFT_CREDENTIALS_KEY": {
+        "description": "Optional. At least 32 random UTF-8 bytes for encrypting Microsoft OAuth tokens and optional combination passwords."
+      }
+    }
+  },
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "dev": "vite",
+    "predev:worker": "npm run db:migrate:local",
     "dev:worker": "wrangler dev --env-file email-worker/.dev.vars --persist-to .wrangler/state",
+    "db:bootstrap": "wrangler d1 execute DB --remote --file scripts/bootstrap-legacy-d1.sql",
+    "db:bootstrap:local": "wrangler d1 execute DB --local --file scripts/bootstrap-legacy-d1.sql",
+    "db:migrate": "node scripts/apply-d1-migrations.mjs --remote",
+    "db:migrate:local": "node scripts/apply-d1-migrations.mjs --local",
+    "predeploy": "npm run db:migrate",
+    "deploy": "wrangler deploy",
     "check:lines": "node scripts/check-file-lines.mjs",
-    "check": "npm run check:lines && tsc --noEmit --pretty false && tsc -p email-worker/tsconfig.json --noEmit --pretty false",
+    "lint": "oxlint src extension/src",
+    "docs:api": "node scripts/generate-api-docs.mjs",
+    "check": "npm run check:lines && npm run lint && tsc --noEmit --pretty false && tsc -p email-worker/tsconfig.json --noEmit --pretty false && tsc -p email-worker/tsconfig.integration.json --noEmit --pretty false",
     "test": "vitest run",
+    "test:worker": "vitest run --config vitest.worker.config.ts",
+    "test:extension": "node scripts/extension-smoke.mjs",
+    "update:extension-store-assets": "npm run build:extension && node scripts/extension-smoke.mjs --update-store-assets",
+    "preview:extension": "npm run build:extension && node scripts/extension-smoke.mjs --preview",
     "test:e2e": "playwright test",
-    "build": "npm run check && vite build"
+    "build": "npm run check && vite build",
+    "build:extension": "vite build --config vite.extension.config.ts"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
     "franc": "^6.2.0",
-    "hono": "4.12.32",
+    "gsap": "^3.15.0",
+    "hono": "4.13.1",
     "lucide-react": "1.27.0",
     "parse5": "^8.0.1",
     "postal-mime": "2.7.5",
@@ -27,16 +71,19 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20260727.1",
+    "@cloudflare/vitest-pool-workers": "^0.21.2",
+    "@cloudflare/workers-types": "5.20260804.1",
     "@playwright/test": "^1.62.0",
+    "@types/chrome": "^0.2.5",
     "@types/node": "26.1.1",
     "@types/qrcode": "^1.5.6",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.4",
+    "oxlint": "^1.79.0",
     "typescript": "7.0.2",
     "vite": "8.1.5",
     "vitest": "4.1.10",
-    "wrangler": "4.114.0"
+    "wrangler": "4.120.0"
   }
 }

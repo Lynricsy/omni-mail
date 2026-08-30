@@ -11,7 +11,7 @@ test('lists recent drafts and resumes editing one', async ({ page }) => {
     localStorage.setItem('omnimail.deployment-guide.v1', 'seen')
     localStorage.setItem('omnimail-locale', 'zh-CN')
   })
-  await page.route('**/api/**', async (route) => {
+  await page.route('**://*/api/**', async (route) => {
     const request = route.request()
     const path = new URL(request.url()).pathname
     if (path === '/api/config') return json(route, {
@@ -60,7 +60,7 @@ test('lists recent drafts and resumes editing one', async ({ page }) => {
   await page.getByRole('button', { name: '继续编辑草稿：Travel details' }).click()
 
   const editor = page.getByRole('region', { name: '编辑草稿' })
-  await expect(editor.getByLabel('收件人')).toHaveValue('friend@example.net')
+  await expect(editor.getByText('friend@example.net', { exact: true })).toBeVisible()
   await expect(editor.getByLabel('主题')).toHaveValue('Travel details')
   await expect(editor.getByText('ticket.pdf')).toBeVisible()
   await expect(page.getByRole('dialog', { name: '编辑草稿' })).toHaveCount(0)

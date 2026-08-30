@@ -14,18 +14,37 @@
   "ai": {
     "binding": "AI"
   },
+  // 注意：以下 database_id / database_name / bucket_name / preview_bucket_name
+  // 必须保留本部署的真实值，不可被上游版本覆盖。
+  //
+  // 上游仓库（mibgb65-cloud/OmniMail）面向「Deploy to Cloudflare」首次预配场景，
+  // 故意省略 DB 的 database_id/database_name 与 MAIL_BUCKET 的 bucket_name。
+  // 按 Cloudflare Wrangler 的 Automatic provisioning 规则，缺少标识符的绑定会在
+  // deploy 时以 Worker 名为前缀新建资源 —— 结果是 D1 迁移被打到一个空库上，
+  // 线上邮件数据仍留在原资源却不再被引用。keep_vars 只保护 vars/secrets，
+  // 不保护这些资源绑定。
+  //
+  // .github/workflows/sync-upstream.yml 在同步上游时始终以本文件为准；
+  // 上游 wrangler.jsonc 一旦变更，该 workflow 会中止并开 issue 要求人工审核。
   "d1_databases": [
     {
-      "binding": "DB","database_id": "de8f09b6-a28b-48b5-b8d1-b45a6321bc1e","database_name": "omni-mail"
+      "binding": "DB",
+      "database_id": "de8f09b6-a28b-48b5-b8d1-b45a6321bc1e",
+      "database_name": "omni-mail",
+      "migrations_dir": "migrations",
+      "migrations_table": "d1_migrations"
     }
   ],
   "r2_buckets": [
     {
-      "binding": "MAIL_BUCKET","bucket_name": "omni-mail","preview_bucket_name": "omni-mail"
+      "binding": "MAIL_BUCKET",
+      "bucket_name": "omni-mail",
+      "preview_bucket_name": "omni-mail"
     },
     {
       "binding": "BACKUP_BUCKET",
-      "bucket_name": "omni-mail-backups","preview_bucket_name": "omni-mail-backups"
+      "bucket_name": "omni-mail-backups",
+      "preview_bucket_name": "omni-mail-backups"
     }
   ],
   "workflows": [
@@ -61,6 +80,7 @@
     "crons": ["*/5 * * * *"]
   },
   "observability": {
-    "enabled": true
+    "enabled": true,
+    "head_sampling_rate": 1
   }
 }

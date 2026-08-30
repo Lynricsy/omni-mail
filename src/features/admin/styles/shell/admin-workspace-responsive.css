@@ -1,0 +1,105 @@
+@media (max-width: 1120px) {
+  .admin-workspace__header::before {
+    left: 78px;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-count-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-scroll-shell {
+    width: 100%;
+    height: calc(100dvh - 68px);
+  }
+
+  .admin-workspace {
+    --admin-page-padding-x: 16px;
+    padding: max(25px, env(safe-area-inset-top)) 16px 42px;
+  }
+
+  .admin-scroll-top {
+    right: 16px;
+    bottom: calc(84px + env(safe-area-inset-bottom));
+    width: 46px;
+    height: 46px;
+  }
+
+  .admin-workspace__header::before {
+    left: 0;
+  }
+
+  .admin-workspace__header {
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .admin-workspace__icon {
+    width: 42px;
+    height: 42px;
+    margin-top: 24px;
+  }
+
+  .admin-workspace__header h1 {
+    font-size: 32px;
+  }
+
+  .admin-workspace__header.is-stuck h1 {
+    font-size: 21px;
+  }
+}
+
+@media (max-width: 440px) {
+  .admin-count-grid {
+    gap: 8px;
+  }
+
+  .admin-count-grid article {
+    min-height: 128px;
+    padding: 14px;
+  }
+
+  .admin-card {
+    padding: 16px;
+  }
+
+  .settings-list > div {
+    grid-template-columns: 1fr;
+    gap: 3px;
+    padding-block: 8px;
+  }
+
+  .settings-list dd {
+    text-align: left;
+  }
+
+  .deployment-launch {
+    min-height: 64px;
+    padding: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-workspace { animation: none; }
+
+  .admin-workspace__header,
+  .admin-workspace__header::before,
+  .admin-workspace__heading,
+  .admin-workspace__icon,
+  .admin-workspace__header h1,
+  .admin-workspace__header .eyebrow,
+  .admin-workspace__header > div > p:last-child,
+  .user-header-actions,
+  .deployment-launch,
+  .admin-scroll-top {
+    transform: none;
+    transition: none;
+  }
+}

@@ -1,0 +1,85 @@
+.theme-setting-card,
+.theme-setting-heading {
+  display: grid;
+  gap: 4px;
+}
+
+.theme-setting-heading strong {
+  font-size: 12px;
+}
+
+.theme-setting-heading span {
+  color: var(--text-tertiary);
+  font-size: 10px;
+}
+
+.theme-options {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.theme-options button {
+  display: grid;
+  width: 100%;
+  min-height: 48px;
+  grid-template-columns: 30px minmax(0, 1fr) 22px;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  text-align: left;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.theme-options button:hover,
+.theme-options button.is-selected {
+  border-color: var(--line-strong);
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.theme-option-icon,
+.theme-option-check {
+  display: grid;
+  place-items: center;
+}
+
+.theme-option-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--surface);
+}
+
+.theme-options button > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.theme-options strong {
+  color: var(--text);
+  font-size: 11px;
+}
+
+.theme-options small {
+  color: var(--text-tertiary);
+  font-size: 9px;
+}
+
+.theme-option-check {
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+}
+
+.theme-options button.is-selected .theme-option-check {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+}

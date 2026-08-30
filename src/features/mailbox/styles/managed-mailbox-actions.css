@@ -1,0 +1,35 @@
+.managed-mailbox__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.managed-mailbox__actions .button {
+  white-space: nowrap;
+}
+
+.managed-mailbox__primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.managed-mailbox__primary svg {
+  color: var(--warning);
+}
+
+@media (max-width: 420px) {
+  .managed-mailbox__actions {
+    grid-column: 1 / -1;
+    justify-content: stretch;
+  }
+
+  .managed-mailbox__actions .button {
+    flex: 1;
+  }
+}

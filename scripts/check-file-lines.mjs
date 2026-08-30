@@ -3,10 +3,13 @@ import { extname, join, relative } from 'node:path'
 
 const root = process.cwd()
 const limit = 600
+const frontendImplementationLimit = 500
 const ignoredDirectories = new Set([
   '.git',
   '.wrangler',
+  'build',
   'dist',
+  'dist-extension',
   'node_modules',
   'playwright-report',
   'test-results',
@@ -48,16 +51,27 @@ function lineCount(filename) {
 
 const files = codeFiles(root)
 const oversized = files
-  .map((filename) => ({ filename, lines: lineCount(filename) }))
-  .filter(({ lines }) => lines > limit)
+  .map((filename) => {
+    const path = relative(root, filename).replaceAll('\\', '/')
+    const frontendImplementation = /^(src|extension\/src)\/.*\.tsx?$/.test(path)
+      && !/^src\/shared\/i18n\/messages\/en\/[^/]+\.ts$/.test(path)
+    return {
+      filename,
+      lines: lineCount(filename),
+      limit: frontendImplementation ? frontendImplementationLimit : limit,
+    }
+  })
+  .filter(({ lines, limit: fileLimit }) => lines > fileLimit)
   .sort((left, right) => right.lines - left.lines)
 
 if (oversized.length) {
-  console.error(`Code files must not exceed ${limit} lines:`)
-  for (const { filename, lines } of oversized) {
-    console.error(`- ${relative(root, filename)}: ${lines}`)
+  console.error('Code files exceed their configured line limits:')
+  for (const { filename, lines, limit: fileLimit } of oversized) {
+    console.error(`- ${relative(root, filename)}: ${lines} (limit ${fileLimit})`)
   }
   process.exitCode = 1
 } else {
-  console.log(`File line limit passed (${files.length} files, max ${limit}).`)
+  console.log(
+    `File line limit passed (${files.length} files; frontend implementations ${frontendImplementationLimit}, others ${limit}).`,
+  )
 }

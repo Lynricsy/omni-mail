@@ -1,0 +1,224 @@
+name: 同步上游 OmniMail
+
+# 定时把上游 mibgb65-cloud/OmniMail 的最新正式 release 合并到 master。
+#
+# 安全设计：
+# 1. 资源绑定闸门 —— 上游 wrangler.jsonc 一变更就中止并开 issue，
+#    避免生产 D1/R2 指向被静默改动。
+# 2. 合并后先在 CI 内跑完整验证（依赖安装、本地 D1 迁移两次幂等、
+#    单元测试、Worker 集成测试、生产构建、wrangler dry-run），
+#    全部通过才提交并推送 master。Workers Builds 的 npm run build
+#    只做 lint/tsc/build，不跑测试，因此这层验证不能省。
+# 3. 只有 push 到 master 才会触发 Workers Builds 执行 npm run deploy，
+#    其 predeploy 会先应用 D1 迁移。
+#
+# 本仓库的 wrangler.jsonc 保存生产资源指向（D1 database_id、R2 bucket_name），
+# 同步时始终以本仓库版本为准。
+
+on:
+  schedule:
+    # 每天 UTC 18:00 = 北京时间次日 02:00
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '上游 tag（留空则取最新正式 release）'
+        required: false
+        type: string
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+env:
+  UPSTREAM: mibgb65-cloud/OmniMail
+  GIT_AUTHOR_NAME: github-actions[bot]
+  GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+  GIT_COMMITTER_NAME: github-actions[bot]
+  GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出本仓库
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: 解析上游目标 tag
+        id: target
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_TAG:-}" ]; then
+            TAG="${INPUT_TAG}"
+          else
+            TAG=$(gh release list --repo "$UPSTREAM" --limit 100 \
+                    --json tagName,isPrerelease,isDraft \
+                    --jq '[.[] | select(.isDraft == false and .isPrerelease == false)
+                           | select(.tagName | test("^v[0-9]"))] | .[0].tagName')
+          fi
+          if [ -z "${TAG:-}" ] || [ "$TAG" = "null" ]; then
+            echo "::error::未能解析上游正式 release tag"
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "目标上游 tag: $TAG"
+
+      - name: 拉取上游对象
+        env:
+          TAG: ${{ steps.target.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git remote add upstream "https://github.com/${UPSTREAM}.git" 2>/dev/null \
+            || git remote set-url upstream "https://github.com/${UPSTREAM}.git"
+          git fetch --no-tags upstream "refs/tags/${TAG}:refs/upstream/target"
+
+      - name: 判断是否已是最新
+        id: check
+        env:
+          TAG: ${{ steps.target.outputs.tag }}
+        run: |
+          set -euo pipefail
+          TARGET=$(git rev-parse 'refs/upstream/target^{commit}')
+          echo "target_commit=$TARGET" >> "$GITHUB_OUTPUT"
+          if git merge-base --is-ancestor "$TARGET" HEAD; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "上游 ${TAG} 已包含在 master，无需同步。"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "待同步至 ${TARGET}"
+          fi
+
+      - name: 闸门检查上游 wrangler.jsonc 是否变更
+        if: steps.check.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.target.outputs.tag }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          UP_BLOB=$(git rev-parse 'refs/upstream/target^{tree}:wrangler.jsonc')
+          REVIEWED=$(tr -d '[:space:]' < .github/upstream-wrangler.sha)
+          if [ "$UP_BLOB" = "$REVIEWED" ]; then
+            echo "上游 wrangler.jsonc 未变更，闸门通过。"
+            exit 0
+          fi
+          echo "::error::上游 wrangler.jsonc 已变更（${REVIEWED} -> ${UP_BLOB}），需人工审核资源绑定。"
+          BODY=$(printf '上游 `%s` 的 `wrangler.jsonc` blob 从 `%s` 变为 `%s`。\n\n本仓库的 `wrangler.jsonc` 保存生产资源指向（D1 `database_id`、R2 `bucket_name`），自动同步不会覆盖它。上游若新增或调整了绑定，需人工合并后把新 blob sha 写入 `.github/upstream-wrangler.sha`，再重新运行同步 workflow。\n\n上游文件：https://github.com/%s/blob/%s/wrangler.jsonc' \
+            "$TAG" "$REVIEWED" "$UP_BLOB" "$UPSTREAM" "$TAG")
+          gh issue create --repo "$GH_REPO" \
+            --title "自动同步中止：上游 wrangler.jsonc 变更（${TAG}）" \
+            --body "$BODY" \
+            || echo "::warning::issue 创建失败，仅以 workflow 失败告警"
+          exit 1
+
+      - name: 合并上游到工作区，保留本地配置
+        if: steps.check.outputs.skip == 'false'
+        id: merge
+        run: |
+          set -euo pipefail
+          git merge --no-commit --no-ff -X theirs 'refs/upstream/target' || true
+
+          git checkout HEAD -- wrangler.jsonc
+          git checkout HEAD -- .github/upstream-wrangler.sha
+          git checkout HEAD -- .github/workflows/sync-upstream.yml
+
+          if git ls-files --unmerged | grep -q .; then
+            echo "::error::存在未能自动解决的合并冲突："
+            git ls-files --unmerged | awk '{print $4}' | sort -u
+            git merge --abort || true
+            exit 1
+          fi
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "合并后无实际变更，跳过。"
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            git merge --abort || true
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ---- 以下验证全部通过后才允许提交与部署 ----
+
+      - name: 准备 Node
+        if: steps.merge.outputs.has_changes == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: 安装依赖
+        if: steps.merge.outputs.has_changes == 'true'
+        run: npm ci
+
+      - name: 本地 D1 迁移幂等校验（连续两次）
+        if: steps.merge.outputs.has_changes == 'true'
+        run: |
+          set -euo pipefail
+          npm run db:migrate:local
+          npm run db:migrate:local
+
+      - name: 单元测试
+        if: steps.merge.outputs.has_changes == 'true'
+        run: npm test
+
+      - name: Worker 集成测试
+        if: steps.merge.outputs.has_changes == 'true'
+        run: npm run test:worker
+
+      - name: 生产构建（含类型检查与 lint）
+        if: steps.merge.outputs.has_changes == 'true'
+        run: npm run build
+
+      - name: Wrangler dry-run
+        if: steps.merge.outputs.has_changes == 'true'
+        run: npx wrangler deploy --dry-run
+
+      - name: 提交并推送 master 触发 Workers Builds
+        if: steps.merge.outputs.has_changes == 'true'
+        env:
+          TAG: ${{ steps.target.outputs.tag }}
+        run: |
+          set -euo pipefail
+          # 构建产物不入库
+          git reset
+          git add -A
+          git reset -- dist .wrangler node_modules 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "::error::验证后无可提交内容，异常中止"
+            exit 1
+          fi
+          git commit \
+            -m "chore(deps): ⬆️ 同步上游 ${UPSTREAM} ${TAG}" \
+            -m "自动同步。已在 CI 内通过依赖安装、本地 D1 迁移两次幂等校验、单元测试、Worker 集成测试、生产构建与 wrangler dry-run。保留本仓库 wrangler.jsonc 的生产资源指向与同步 workflow。Workers Builds 将执行 npm run deploy，其 predeploy 先应用 D1 迁移。" \
+            -m "Co-authored-by: Wine Fox <fox@ling.plus>"
+          git push origin HEAD:master
+
+      - name: 运行摘要
+        if: always()
+        env:
+          TAG: ${{ steps.target.outputs.tag }}
+          SKIPPED: ${{ steps.check.outputs.skip }}
+          CHANGED: ${{ steps.merge.outputs.has_changes }}
+        run: |
+          {
+            echo "### 上游同步结果"
+            echo ""
+            echo "| 项 | 值 |"
+            echo "|---|---|"
+            echo "| 上游 | \`${UPSTREAM}\` |"
+            echo "| 目标 tag | \`${TAG:-未解析}\` |"
+            echo "| 已是最新 | \`${SKIPPED:-n/a}\` |"
+            echo "| 有变更 | \`${CHANGED:-n/a}\` |"
+            echo "| 结论 | \`${{ job.status }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,358 @@
+.icloud-scope-switcher {
+  position: relative;
+  width: fit-content;
+}
+
+.icloud-scope-trigger {
+  display: grid;
+  min-width: 155px;
+  min-height: 44px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 0 8px;
+  margin: 0 0 2px -7px;
+  padding: 4px 7px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.icloud-scope-trigger:hover,
+.icloud-scope-trigger[aria-expanded="true"] {
+  background: var(--surface-hover);
+}
+
+.icloud-scope-trigger > span {
+  overflow: hidden;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.icloud-scope-trigger > strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icloud-scope-trigger > svg {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  color: var(--text-tertiary);
+  transition: transform 180ms ease;
+}
+
+.icloud-scope-trigger[aria-expanded="true"] > svg { transform: rotate(180deg); }
+
+.icloud-scope-backdrop {
+  position: fixed;
+  z-index: 70;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.icloud-scope-panel {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 8px);
+  left: -7px;
+  display: flex;
+  width: min(380px, calc(100vw - 28px));
+  height: min(650px, calc(100dvh - 110px));
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  outline: 0;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  animation: icloud-scope-in 170ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.icloud-scope-panel.is-closing {
+  pointer-events: none;
+  animation: icloud-scope-out 120ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.icloud-scope-panel > header {
+  display: flex;
+  min-height: 70px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.icloud-scope-panel header small { color: var(--text-tertiary); font-size: 9px; font-weight: 700; letter-spacing: 0.13em; }
+.icloud-scope-panel header h2 { margin: 2px 0 0; font-size: 18px; }
+
+.icloud-scope-content {
+  min-height: 0;
+  overflow-y: scroll;
+  padding: 7px;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .icloud-scope-content {
+    scrollbar-color: transparent transparent;
+  }
+
+  .icloud-scope-content:hover,
+  .icloud-scope-content:focus-within {
+    scrollbar-color: var(--line-strong) transparent;
+  }
+
+  .icloud-scope-content::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  .icloud-scope-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .icloud-scope-content::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    background-clip: padding-box;
+  }
+
+  .icloud-scope-content:hover::-webkit-scrollbar-thumb,
+  .icloud-scope-content:focus-within::-webkit-scrollbar-thumb {
+    background: var(--line-strong);
+    background-clip: padding-box;
+  }
+}
+
+.icloud-scope-content section + section { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+.icloud-scope-content h3 { margin: 4px 8px 6px; color: var(--text-secondary); font-size: 12px; letter-spacing: 0.04em; }
+
+.icloud-scope-section-header {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 2px 2px 8px;
+}
+
+.icloud-scope-section-header h3 { margin: 0; }
+
+.icloud-scope-sort {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.icloud-scope-sort-trigger {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.icloud-scope-sort-chip {
+  display: flex;
+  height: 32px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px;
+  border-radius: 9px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 650;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.icloud-scope-sort-trigger:hover .icloud-scope-sort-chip,
+.icloud-scope-sort-trigger[aria-expanded="true"] .icloud-scope-sort-chip {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.icloud-scope-sort-trigger:focus-visible .icloud-scope-sort-chip {
+  outline: 3px solid color-mix(in srgb, var(--text) 25%, transparent);
+  outline-offset: 2px;
+}
+
+.icloud-scope-sort-chip > svg:last-child {
+  transition: transform 150ms ease;
+}
+
+.icloud-scope-sort-trigger[aria-expanded="true"] .icloud-scope-sort-chip > svg:last-child {
+  transform: rotate(180deg);
+}
+
+.icloud-scope-sort-menu {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% - 3px);
+  right: 0;
+  width: 136px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  animation: icloud-sort-menu-in 140ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.icloud-scope-sort-menu button {
+  display: flex;
+  width: 100%;
+  min-height: 40px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.icloud-scope-sort-menu button:hover,
+.icloud-scope-sort-menu button:focus-visible,
+.icloud-scope-sort-menu button[aria-pressed="true"] {
+  outline: 0;
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.icloud-scope-sort-menu button > svg {
+  flex: 0 0 auto;
+  color: var(--success);
+}
+
+.icloud-scope-option {
+  display: grid;
+  width: 100%;
+  min-height: 52px;
+  grid-template-columns: auto minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.icloud-scope-option:hover,
+.icloud-scope-option:focus-visible,
+.icloud-scope-option.is-selected {
+  outline: 0;
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.icloud-scope-content button > span:nth-child(2) { display: grid; min-width: 0; gap: 2px; }
+.icloud-scope-content button strong,
+.icloud-scope-content button small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.icloud-scope-content button strong { font-size: 12px; }
+.icloud-scope-content button small { color: var(--text-tertiary); font-size: 9px; }
+.icloud-scope-option > svg { color: var(--success); }
+
+.icloud-scope-account,
+.icloud-scope-alias {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  align-items: center;
+  border-radius: 10px;
+  transition: background 160ms ease;
+}
+
+.icloud-scope-account:hover,
+.icloud-scope-account:focus-within,
+.icloud-scope-account.is-selected,
+.icloud-scope-alias:hover,
+.icloud-scope-alias:focus-within,
+.icloud-scope-alias.is-selected {
+  background: var(--surface-muted);
+}
+
+.icloud-scope-account .icloud-scope-option:hover,
+.icloud-scope-account .icloud-scope-option:focus-visible,
+.icloud-scope-alias .icloud-scope-option:hover,
+.icloud-scope-alias .icloud-scope-option:focus-visible {
+  background: transparent;
+}
+
+.icloud-scope-settings,
+.icloud-scope-copy {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.icloud-scope-settings:hover,
+.icloud-scope-settings:focus-visible,
+.icloud-scope-copy:hover,
+.icloud-scope-copy:focus-visible {
+  outline: 0;
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.icloud-scope-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+}
+
+@keyframes icloud-scope-in { from { opacity: 0; transform: translateY(-6px) scale(0.985); } }
+@keyframes icloud-scope-out { to { opacity: 0; transform: translateY(-6px) scale(0.985); } }
+@keyframes icloud-sort-menu-in { from { opacity: 0; transform: translateY(-4px) scale(0.98); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .icloud-scope-trigger > svg,
+  .icloud-scope-panel,
+  .icloud-scope-account,
+  .icloud-scope-settings,
+  .icloud-scope-alias,
+  .icloud-scope-copy,
+  .icloud-scope-sort-chip,
+  .icloud-scope-sort-chip > svg,
+  .icloud-scope-sort-menu { animation: none; transition: none; }
+}

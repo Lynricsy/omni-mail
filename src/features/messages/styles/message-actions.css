@@ -1,0 +1,207 @@
+.attachments {
+  max-width: 920px;
+  margin: 34px auto 0;
+  padding-top: 25px;
+  border-top: 1px solid var(--line);
+}
+
+.attachments h2 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.attachment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 9px;
+}
+
+.attachment-card {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  min-height: 66px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+.attachment-card:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-hover);
+}
+
+.attachment-card > span {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+
+.attachment-card > div {
+  display: grid;
+  min-width: 0;
+}
+
+.attachment-card strong {
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-card small {
+  color: var(--text-tertiary);
+  font-size: 9px;
+}
+
+.attachment-card > svg {
+  color: var(--text-tertiary);
+}
+
+.message-footer-actions {
+  display: flex;
+  max-width: 920px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 38px auto 0;
+}
+
+.quiet-link {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.quiet-link:hover {
+  color: var(--text);
+}
+
+.reply-composer {
+  position: absolute;
+  z-index: 10;
+  right: 24px;
+  bottom: 24px;
+  width: min(590px, calc(100% - 48px));
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.reply-composer__header,
+.reply-composer__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 15px;
+}
+
+.reply-composer__header {
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-muted);
+}
+
+.reply-composer__header > div {
+  display: grid;
+  min-width: 0;
+}
+
+.reply-composer__header small,
+.reply-composer__footer > span {
+  color: var(--text-tertiary);
+  font-size: 9px;
+}
+
+.reply-composer__header strong {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reply-composer textarea {
+  display: block;
+  width: 100%;
+  min-height: 190px;
+  padding: 18px;
+  resize: vertical;
+  border: 0;
+  outline: 0;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.reply-composer textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+.reply-composer .inline-error {
+  margin: 0 15px 10px;
+}
+
+.reply-composer__footer {
+  border-top: 1px solid var(--line);
+}
+
+.toast {
+  position: fixed;
+  z-index: 100;
+  right: 24px;
+  bottom: 24px;
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 1px solid color-mix(in srgb, var(--success) 25%, transparent);
+  border-radius: 999px;
+  background: var(--success-soft);
+  color: var(--success);
+  box-shadow: var(--shadow-sm);
+  font-size: 12px;
+  font-weight: 600;
+  animation: toast-in 240ms ease both;
+}
+
+.toast--update {
+  bottom: 80px;
+  border-color: var(--line-strong);
+  background: var(--surface);
+  color: var(--text-secondary);
+  animation: toast-in 240ms ease both, toast-out 180ms ease 4.82s forwards;
+}
+
+.toast--update svg { color: var(--warning); }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
+@keyframes toast-out { to { opacity: 0; } }

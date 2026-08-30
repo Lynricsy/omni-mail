@@ -35,6 +35,7 @@
 - [首次初始化](#首次初始化)
 - [用户与权限](#用户与权限)
 - [API 与桌面客户端](#api-与桌面客户端)
+- [浏览器悬浮扩展](#浏览器悬浮扩展)
 - [本地开发](#本地开发)
 - [安全模型](#安全模型)
 - [限制与路线图](#限制与路线图)
@@ -56,6 +57,12 @@ Serverless Webmail：
 | 完整权限模型 | 主管理员、管理员、普通用户和限时临时用户 |
 | 可选发信能力 | 通过 Resend 或 SendFlare 新建邮件与回复；不配置时仍可正常收件 |
 | Web 与桌面共用 API | 浏览器使用安全 Cookie，桌面客户端使用 Access / Refresh Token |
+| 网页悬浮邮箱 | 可选 Chrome 扩展用于生成邮箱、填入网页、收件与后台通知 |
+| iCloud 隐藏邮箱 | 可选接入 iCloud+ Hide My Email，管理别名并按需读取最近来信 |
+| Gmail 聚合收件箱 | 连接多个 Gmail / Workspace 账号，搜索聚合的 INBOX 元数据并在打开后同步已读 |
+| QQ 邮箱聚合收件箱 | 使用授权码连接多个个人 QQ 邮箱，有限同步 INBOX，并通过官方 SMTP 新建或回复邮件 |
+| NAVER 邮箱聚合收件箱 | 使用应用专用密码连接个人 NAVER 邮箱，有限同步 INBOX 并按需读取正文与附件 |
+| Yandex 邮箱聚合收件箱 | 使用 Mail 应用密码连接个人 Yandex 邮箱，有限同步 INBOX 并按需读取正文与附件 |
 | 管理可观测性 | 收件统计、来源分析、操作日志和部署自检 |
 
 ## 功能概览
@@ -71,10 +78,114 @@ Serverless Webmail：
 - 私有附件与原始 `.eml` 下载
 - 按域名、邮箱地址、发件人、主题与正文搜索
 - 稳定游标分页、自适应自动刷新与跨标签页轮询合并
-- Resend / SendFlare 主动发信、线程内回复、队列投递及用户级限速
+- Resend / SendFlare 主动发信、线程内快速回复、队列投递及用户级限速
+- 新邮件和快速回复均可添加最多 5 个附件；单个不超过 5 MiB，合计不超过 10 MiB
 - 左侧草稿箱默认保留最近 5 封未发送邮件，管理员可按用户级别设置 1–20 封上限；
-  每封支持最多 5 个发件附件
+  草稿附件随草稿自动保存
 - Webmail 打开期间可选浏览器新邮件通知
+
+### iCloud 隐藏邮箱
+
+- 每个 OmniMail 用户可以连接自己的 `icloud.com` 或 `icloud.com.cn` 账号
+- 同步、创建、停用、恢复和删除 iCloud+ Hide My Email 地址
+- 应用专用密码可通过 iCloud IMAP 按隐藏地址筛选并读取完整正文；IMAP 不可用时，
+  全部邮件视图会回退到 iCloud Web 摘要
+- iCloud Cookie 与应用专用密码使用 AES-GCM 加密后保存到 D1，密文绑定用户、账号
+  与字段，读取接口只返回“已配置”状态
+- iCloud 邮件按需从 Apple 读取，不会复制到 OmniMail 的 D1 / R2，也不进入现有收件箱
+
+#### iCloud 使用注意事项
+
+- 仅支持已开通 iCloud+ 且拥有 **Hide My Email** 权限的 Apple 账号；“仅网页访问”、未开通 iCloud+ 或没有隐藏邮箱权限的账号无法添加。
+- 添加账号时需要从对应的 `icloud.com` / `icloud.com.cn` 会话导入 Cookie。Cookie 过期、复制不完整或 Apple 拒绝权限时，添加会失败并在弹窗显示原因，不会退出 OmniMail 当前登录账号。
+- `ICLOUD_CREDENTIALS_KEY` 必须配置为至少 32 字节的 Secret；更换或恢复部署时请确认该 Secret 没有丢失，否则无法解密已保存凭据。
+- `LINUX_DO_MAIL_CREDENTIALS_KEY` 必须配置为至少 32 字节的 Secret；它用于加密 Linux DO Mail 密码或认证令牌。
+- 应用专用密码不是创建隐藏邮箱的必需项；只有需要通过 IMAP 按地址筛选或读取完整邮件正文时才需要配置，并且必须绑定当前 iCloud 邮箱。
+- iCloud 邮件和别名由 Worker 按需访问 Apple，不会同步进 OmniMail 收件箱；Apple 服务、订阅状态、区域限制和请求频率可能影响读取结果。
+- 不要把 Cookie 或应用专用密码提交到 Git、截图、工单或第三方聊天中；OmniMail 只在 Worker 内加密保存，浏览器不会再次读取原值。
+
+### Gmail 聚合收件箱
+
+- 每个 OmniMail 用户可连接多个自己有权访问的 Gmail 或 Google Workspace 账号。
+- 固定连接 `imap.gmail.com:993`。后台同步使用 `EXAMINE`、受控 `UID SEARCH` / `UID FETCH`；
+  用户打开正文后只允许执行固定的 `UID STORE ... +FLAGS.SILENT (\Seen)` 标记已读。
+- 不开放星标、归档、移动、删除或发送邮件等其他远端写操作。
+- D1 每个账号首次索引最近 100 封、最多保留最近 500 封 INBOX 元数据；正文、内嵌图片
+  和附件仅在用户打开时读取，不持久化到 D1 / R2。
+- 搜索框在当前账号或全部账号的 D1 索引中匹配发件人、收件人和主题，
+  不会为搜索额外下载或持久化 Gmail 正文。
+- 每 5 分钟由 Cron 错峰加入 Queue，同一账号通过短时租约避免并发同步；账号失败不会阻断
+  其他 Gmail 账号或 OmniMail 主邮箱。
+- 应用专用密码使用独立的 `GMAIL_CREDENTIALS_KEY` 进行 AES-GCM 加密，密文上下文绑定
+  用户、账号和字段；API 只返回 `hasAppPassword: true`。
+
+#### Gmail 使用注意事项
+
+- Google 官方优先推荐“使用 Google 账号登录”；OmniMail 为保持纯自托管部署而提供应用专用
+  密码模式。应用密码本身不具备细粒度 scope，远端操作边界由 OmniMail 的命令白名单保证。
+- 应用专用密码要求先开启两步验证，并且某些 Workspace、Advanced Protection 或仅安全密钥
+  两步验证账号无法创建。请勿填写 Google 账号主密码。
+- Google 账号主密码变化时，现有应用密码会被撤销。连接失效后需生成新密码并在账号管理中更新。
+- 删除 OmniMail 本地连接只会删除密文和索引；还必须前往
+  [Google 应用专用密码](https://myaccount.google.com/apppasswords)手动撤销对应密码。
+- 个人 Gmail 的 IMAP 默认开启；Workspace 是否允许第三方 IMAP 和应用密码仍由组织策略决定。
+
+### Microsoft 邮箱（仅已读写入）
+
+- 每个 OmniMail 用户可连接多个 Outlook.com、Hotmail、Live，或租户允许 IMAP 的
+  Microsoft 365 委托式账号；首期只支持 Azure Global。
+- OAuth2 是唯一认证路径：Worker 只向 Microsoft 官方 token endpoint 兑换 access token，随后
+  固定连接 `outlook.office365.com:993` 并使用 IMAP XOAUTH2。仅邮箱密码导入与 LOGIN 已停用。
+- 工作区可以聚合 INBOX，也可选择单账号的服务器文件夹，按 1–200 条读取元数据。全部范围可把
+  所有账号逐个加入同步 Queue，单账号范围可直接刷新当前文件夹；复制按钮在全部范围默认复制
+  第一个账号邮箱。正文、CID 图片与最大 5 MiB 附件仅在打开时通过 `BODY.PEEK[]` 读取，不长期保存。
+- Cron 约每 5 分钟将到期 INBOX 同步加入 Queue；这是定时收信，不是秒级推送。打开未读邮件会在
+  正文读取成功后同步 `\Seen`；除此之外不提供发信、删除、移动、归档或星标等远端写操作。
+- refresh token、短期 access token与经确认留存的四字段组合 password 使用独立
+  `MICROSOFT_CREDENTIALS_KEY` 进行 AES-GCM 加密；组合 password 不参与认证，API、日志与审计
+  记录也不会返回敏感凭据。
+
+详细部署、OAuth scope、导入格式与真实账号验收步骤见
+[Microsoft 邮箱设置指南](docs/MICROSOFT_SETUP.md)。
+
+### QQ 邮箱
+
+- 每个 OmniMail 用户可连接多个个人 `@qq.com` 收件账号；同一账号可添加经过 QQ SMTP 验证的
+  英文 `@qq.com`、`@foxmail.com` 与 `@vip.qq.com` 发信身份，腾讯企业邮箱不在支持范围。
+- 用户先在 QQ 邮箱中开启 IMAP/SMTP 服务并生成授权码，OmniMail 固定连接
+  `imap.qq.com:993` TLS；不接受 QQ 登录密码或自定义服务器。
+- 首次只索引最近 100 封、每账号最多保留 500 封 INBOX 元数据；正文与最大 5 MiB 附件按需
+  读取且不持久化。打开正文后仅尝试精确写入 `\\Seen`，不支持移动、删除、归档或星标。
+- 可从所选 QQ 账号向单个收件人新建或回复邮件；写信时可选择已验证身份，发件固定连接
+  `smtp.qq.com:465` 直接 TLS，并复用 Queue、幂等、限速和审计链路。
+- 授权码由独立的 `QQ_MAIL_CREDENTIALS_KEY` 使用 AES-GCM 加密，API 只返回
+  `hasAuthorizationCode: true`；单账号故障不会阻断其他账号或其他邮件工作区。
+
+部署和真实账号验收步骤见 [QQ 邮箱设置指南](docs/QQ_MAIL_SETUP.md)。
+
+### NAVER 邮箱（灰度、只读）
+
+- 仅支持个人 `@naver.com` 邮箱；用户需先开启 NAVER 两步验证和 IMAP/SMTP，并生成独立的
+  应用专用密码。OmniMail 固定连接 `imap.naver.com:993`，不接受登录主密码或自定义服务器。
+- 首次索引最近 100 封、每账号最多保留 500 封 INBOX 元数据，默认每 15 分钟加入同步 Queue；
+  正文与最大 5 MiB 附件按需读取且不持久化。
+- 打开正文后仅尝试精确写入 `\\Seen`；不支持发信、删除、移动、归档、星标或文件夹管理。
+- 应用专用密码由独立的 `NAVER_MAIL_CREDENTIALS_KEY` 使用 AES-GCM 加密，API 只返回
+  `hasAppPassword: true`。入口默认隐藏，生产开放前必须完成真实 Worker 登录和 24 小时稳定性观察。
+
+部署、灰度闸门和真实账号验收步骤见 [NAVER Mail 设置指南](docs/NAVER_MAIL_SETUP.md)。
+
+### Yandex 邮箱（灰度、只读）
+
+- 首版仅支持个人 `@yandex.com` 邮箱，使用 Yandex ID 中为“邮件”创建的应用密码。
+- OmniMail 固定连接 `imap.yandex.com:993`；登录名从邮箱本地部分派生，不接受主密码、自定义
+  服务器、企业自定义域名或共享邮箱技术用户名。
+- 首次索引最近 100 封、每账号最多保留 500 封 INBOX 元数据，默认每 15 分钟加入同步 Queue；
+  正文与最大 5 MiB 附件按需读取且不持久化。
+- 打开正文后仅尝试精确写入 `\Seen`；不支持发信、删除、移动、归档、星标或文件夹管理。
+- 应用密码由独立 `YANDEX_MAIL_CREDENTIALS_KEY` 使用 AES-GCM 加密；入口和部署开关默认关闭。
+
+部署和灰度验收步骤见 [Yandex Mail 设置指南](docs/YANDEX_MAIL_SETUP.md)。
 
 ### 多域名与用户
 
@@ -136,15 +247,27 @@ flowchart LR
 ```text
 .
 ├── src/                       # React Webmail
+│   ├── app/                   # 应用装配、导航与全局样式
+│   ├── features/              # 邮箱、消息、认证、管理等业务功能
+│   ├── shared/                # API、i18n、通用邮件与 UI 能力
+│   └── main.tsx               # Web 稳定入口
 ├── public/                    # Worker Static Assets 与安全响应头
 ├── email-worker/
-│   ├── src/                   # API、收件、队列与定时任务
+│   └── src/
+│       ├── app/               # Hono 装配、中间件与路由
+│       ├── features/          # Provider 与 Worker 业务功能
+│       ├── platform/          # D1、IMAP 与调度适配
+│       ├── shared/            # Worker 跨功能基础能力
+│       └── index.ts           # Worker 稳定入口
 ├── migrations/                # 可审阅的 D1 迁移
 ├── docs/API.md                # HTTP API 文档
+├── docs/ARCHITECTURE.md       # 代码目录和依赖边界约定
 ├── scripts/                   # 仓库质量检查脚本
 ├── wrangler.jsonc             # Worker、静态前端与 Cloudflare 资源配置
 └── .github/workflows/ci.yml   # GitHub Actions
 ```
+
+详细的文件归属和新增功能约定见 [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)。
 
 ## 快速部署
 
@@ -168,10 +291,30 @@ API path       https://mail.example.com/api/*
 
 同源部署不需要额外的 Pages 项目或独立 API 域名，登录 Cookie 和 CORS 配置也更简单。
 
-### 1. Fork 仓库
+### 一键部署（独立快照）
 
-Fork [mibgb65-cloud/OmniMail](https://github.com/mibgb65-cloud/OmniMail)，
-然后让 Cloudflare Worker 连接你的 Fork。
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/mibgb65-cloud/OmniMail)
+
+Cloudflare 会把仓库导入你的 GitHub 账户，创建并绑定 D1、R2、Queue 等资源，提示填写
+`SETUP_TOKEN` 和 `SUPER_ADMIN_EMAIL`，然后通过 Workers Builds 完成构建、数据库迁移
+和 Worker 部署。
+
+> [!NOTE]
+> Deploy to Cloudflare 会创建一个独立 Git 仓库，而不是 GitHub Fork。该仓库不会显示
+> **Sync fork**，也不会自动同步上游提交或 Release Tag。此方式适合快速试用；需要
+> 持续获取后续更新时，请使用下一节的 Fork 部署流程。
+
+> [!IMPORTANT]
+> 一键部署不会修改域名 DNS、MX 或 Email Routing。Worker 部署完成后，仍需继续完成
+> [配置 Worker](#3-配置-worker)和[启用 Email Routing](#4-启用-email-routing)。
+
+### Fork 后部署（支持同步更新，长期使用推荐）
+
+#### 1. 创建 Fork
+
+打开 [Fork OmniMail](https://github.com/mibgb65-cloud/OmniMail/fork)，在 GitHub 中创建
+Fork。创建完成后，仓库标题下方应显示 `forked from mibgb65-cloud/OmniMail`，然后让
+Cloudflare Worker 连接这个 Fork。
 
 如果使用本地 Git：
 
@@ -180,7 +323,7 @@ git clone https://github.com/YOUR_NAME/OmniMail.git
 cd OmniMail
 ```
 
-### 2. 连接 Cloudflare Worker
+#### 2. 连接 Cloudflare Worker
 
 在 Cloudflare Dashboard 中进入 **Workers & Pages → Create application →
 Import a repository**，选择你的 OmniMail 仓库：
@@ -191,16 +334,16 @@ Import a repository**，选择你的 OmniMail 仓库：
 | Production branch | `main` |
 | Root directory | `/` |
 | Build command | `npm run build` |
-| Deploy command | `npx wrangler deploy` |
+| Deploy command | `npm run deploy` |
 | Non-production branch builds | 首次部署暂时关闭 |
 | API token | 让 Cloudflare 自动创建 |
 
-第一次部署会依据
+无论使用独立快照一键部署还是导入 Fork，第一次部署都会依据
 [`wrangler.jsonc`](./wrangler.jsonc) 完成两件事：
 
 1. `npm run build` 将 React 前端生成到 `dist/`。
-2. Wrangler 将 `dist/`、Worker API、D1、R2、Queue、Workflow 和定时任务作为同一个
-   Worker 版本发布。
+2. `npm run deploy` 先应用尚未执行的 D1 迁移，再由 Wrangler 将 `dist/`、Worker
+   API、D1、R2、Queue、Workflow 和定时任务作为同一个 Worker 版本发布。
 
 `/api/*` 优先交给 Worker 脚本，其余路径由 Static Assets 提供；未匹配的浏览器
 导航会回退到 `index.html`，因此 React SPA 刷新不会出现 404。
@@ -208,6 +351,37 @@ Import a repository**，选择你的 OmniMail 仓库：
 Cloudflare Workers Builds 会在 `main` 更新后自动拉取、构建并部署，不需要在
 GitHub Actions 中重复配置 Cloudflare API Token。GitHub Actions 只负责运行测试、
 类型检查和部署预检。
+
+#### Float 与 Android 更新的构建过滤
+
+本仓库同时包含 Web/Worker、OmniMail Float 与 Android App。为了避免只修改 Float
+或 Android 代码时仍重新部署网站，请在 Cloudflare Dashboard 的 **Workers & Pages
+→ omni-mail → Settings → Build → Build watch paths** 中设置：
+
+```text
+Includes:
+*
+
+Excludes:
+android/*
+docs/releases/android/*
+.github/workflows/android-release.yml
+extension/*
+docs/releases/float/*
+.github/workflows/float-release.yml
+```
+
+纯 Float 或 Android 更新会因此跳过 Workers Builds；如果同一次提交还修改了 Web 或
+Worker 文件，剩余路径仍会匹配 `*` 并正常部署。Build watch paths 属于 Cloudflare
+项目配置，不会写入 `wrangler.jsonc`，新建或迁移项目时需要手动复现。更多规则参见
+[Cloudflare Build watch paths](https://developers.cloudflare.com/workers/ci-cd/builds/build-watch-paths/)。
+
+#### 后续同步上游更新
+
+原仓库发布更新后，在自己的 Fork 页面选择 **Sync fork → Update branch**。GitHub
+会把上游提交同步到 Fork 的 `main`；Workers Builds 检测到新提交后会自动运行上述
+构建、D1 迁移和部署命令。存在冲突时，先按 GitHub 提示创建 Pull Request 并人工解决，
+不要强制覆盖包含自定义修改的生产分支。
 
 ### 3. 配置 Worker
 
@@ -224,46 +398,59 @@ GitHub Actions 中重复配置 Cloudflare API Token。GitHub Actions 只负责�
 | --- | --- | --- |
 | `APP_NAME` | Text | 自定义站点名称，默认 `OmniMail` |
 | `COOKIE_SECURE` | Text | 生产环境保持 `true`；仅本地 HTTP 使用 `false` |
-| `APP_ORIGINS` | Text | 允许访问 API 的额外跨域前端来源 |
+| `APP_ORIGINS` | Text | 允许访问 API 的额外跨域前端、开发版或其他扩展 ID；商店版由系统设置开关管理 |
 | `TURNSTILE_SITE_KEY` | Text | Turnstile 公开 Site Key |
 | `TURNSTILE_SECRET_KEY` | Secret | Turnstile 私密 Secret Key |
 | `LINUX_DO_CLIENT_ID` | Text | Linux DO Connect Client ID |
 | `LINUX_DO_CLIENT_SECRET` | Secret | Linux DO Connect Client Secret |
-| `RESEND_API_KEY` | Secret | Resend 主动发信与回复 |
-| `RESEND_FROM` | Text | 可选固定发件人，例如 `OmniMail <reply@example.com>` |
 | `RESEND_DOMAIN_CONFIGS` | Secret | 按发件域名配置独立的 Resend API Key 与可选发件人 |
-| `RESEND_WEBHOOK_SECRET` | Secret | Resend 投递状态 Webhook 的 Signing Secret |
+| `RESEND_WEBHOOK_SECRET` | Secret | 单个 Resend Webhook 的 Signing Secret（兼容旧配置） |
+| `RESEND_WEBHOOK_SECRETS` | Secret | 多个 Resend Webhook Signing Secret 组成的 JSON 数组 |
 | `SENDFLARE_API_KEY` | Secret | SendFlare 全局主动发信与回复 |
 | `SENDFLARE_FROM` | Text | 可选固定发件邮箱地址，例如 `reply@example.com` |
 | `SENDFLARE_DOMAIN_CONFIGS` | Secret | 按发件域名配置独立的 SendFlare API Key 与可选发件邮箱 |
 | `TOTP_ENCRYPTION_KEY` | Secret | 至少 32 个随机字符，用于加密管理员 TOTP 密钥 |
-| `CLOUDFLARE_ACCOUNT_ID` | Text | 可选备份或自动更新所需的 Cloudflare Account ID |
-| `CLOUDFLARE_BUILDS_TRIGGER_ID` | Text | 自动更新使用的 production build trigger UUID |
-| `CLOUDFLARE_BUILDS_BRANCH` | Text | 自动更新对应的生产分支，默认 `main` |
-| `CLOUDFLARE_BUILDS_API_TOKEN` | Secret | 仅用于触发并读取 Workers Builds 的专用 Token |
+| `ICLOUD_CREDENTIALS_KEY` | Secret | 至少 32 字节，用于加密 iCloud Cookie 与应用专用密码；不使用 iCloud 功能时可留空 |
+| `LINUX_DO_MAIL_CREDENTIALS_KEY` | Secret | 至少 32 字节，用于加密 Linux DO Mail 密码或认证令牌；不使用该功能时可留空 |
+| `GMAIL_CREDENTIALS_KEY` | Secret | 至少 32 字节，只用于加密 Gmail 应用专用密码；不使用该功能时可留空 |
+| `GMAIL_IMAP_ENABLED` | Text | 可选紧急功能开关；设为 `false` 时隐藏并停止 Gmail 接入，默认启用 |
+| `QQ_MAIL_CREDENTIALS_KEY` | Secret | 至少 32 字节，只用于加密 QQ 邮箱授权码；不使用该功能时可留空 |
+| `QQ_MAIL_IMAP_ENABLED` | Text | 可选紧急功能开关；设为 `false` 时隐藏并停止 QQ 邮箱接入，默认启用 |
+| `NAVER_MAIL_CREDENTIALS_KEY` | Secret | 至少 32 字节，只用于加密 NAVER 应用专用密码；不使用该功能时可留空 |
+| `NAVER_MAIL_IMAP_ENABLED` | Text | NAVER 功能开关；仅设为 `true` 时启用，完成真实账号验收前保持 `false` |
+| `MICROSOFT_CREDENTIALS_KEY` | Secret | 至少 32 字节，用于加密 Microsoft OAuth token 与可选组合 password；不使用该功能时可留空 |
+| `MICROSOFT_MAIL_ENABLED` | Text | 可选紧急功能开关；设为 `false` 时隐藏并停止 Microsoft 接入，默认启用 |
+| `CLOUDFLARE_ACCOUNT_ID` | Text | 可选备份所需的 Cloudflare Account ID |
 | `UPDATE_REPOSITORY` | Text | Release 来源仓库，默认 `mibgb65-cloud/OmniMail` |
 | `D1_DATABASE_ID` | Text | 可选备份所需的生产 D1 Database ID |
 | `D1_REST_API_TOKEN` | Secret | 可选备份所需、仅授予 D1 Edit 的专用 API Token |
 
-如果多个域名可放在同一个 Resend 账户中，可继续只设置 `RESEND_API_KEY`。受 Resend
-套餐域名数量限制时，把 `RESEND_DOMAIN_CONFIGS` 设为 JSON Secret，为每个发件域名
-指定独立账户的 API Key：
+把 `RESEND_DOMAIN_CONFIGS` 设为 JSON Secret，为每个发件域名指定对应的 API Key。
+只有一个域名时只需要一个条目：
 
 ```json
 {
-  "example.com": { "apiKey": "re_example" },
-  "another.example": {
-    "apiKey": "re_another",
-    "from": "OmniMail <reply@another.example>"
+  "openai.com": { "apiKey": "re_openai" }
+}
+```
+
+多个域名时合并到同一个 JSON 对象中：
+
+```json
+{
+  "openai.com": { "apiKey": "re_openai" },
+  "closeai.com": {
+    "apiKey": "re_closeai",
+    "from": "OmniMail <reply@closeai.com>"
   }
 }
 ```
 
-域名匹配不区分大小写，并使用精确匹配。匹配到域名专属配置时优先使用它；未匹配时
-回退到 `RESEND_API_KEY` 和 `RESEND_FROM`。专属配置没有设置 `from` 时，用户选择的
-邮箱会作为发件人；固定发件人情况下，用户选择的邮箱仍作为 Reply-To。每个发件域名
-都需要在对应的 Resend 账户中完成验证。API Key 应通过 Cloudflare Secret 保存。
-配置不是合法 JSON 或任一域名缺少 `apiKey` 时会禁用发信，不会回退到旧账户。
+推荐使用 `apiKey`；也兼容 `apikey` 写法。域名匹配不区分大小写，并使用精确匹配，
+未配置的域名不能通过 Resend 发信。没有设置 `from` 时，用户选择的邮箱会作为发件人；
+设置固定发件人时，用户选择的邮箱仍作为 Reply-To。每个发件域名都需要在对应的
+Resend 账户中完成验证。API Key 应通过 Cloudflare Secret 保存。配置不是合法 JSON
+或任一域名缺少 `apiKey`/`apikey` 时会禁用 Resend 发信。
 
 SendFlare 可以通过全局 Secret 配置：
 
@@ -285,8 +472,8 @@ SENDFLARE_FROM=reply@example.com
 ```
 
 将上述 JSON 保存为 `SENDFLARE_DOMAIN_CONFIGS` Secret。匹配的 SendFlare 域名配置优先
-于 Resend；其余域名继续使用原有 Resend 配置，最后才回退到全局
-`SENDFLARE_API_KEY`。因此现有 `RESEND_*` 配置无需修改。SendFlare 的 `from` 必须是
+于 Resend；其余域名继续使用匹配的 Resend 域名配置，最后才回退到全局
+`SENDFLARE_API_KEY`。SendFlare 的 `from` 必须是
 已验证域名下的纯邮箱地址，不能使用 `名称 <邮箱>` 格式。
 
 SendFlare 当前发送接口没有附件字段。含附件邮件若存在可用 Resend 配置，会自动改用
@@ -308,37 +495,81 @@ https://你的域名/api/webhooks/resend
 ```
 
 选择 `email.sent`、`email.delivered`、`email.delivery_delayed`、`email.bounced`、
-`email.complained`、`email.failed` 与 `email.suppressed`，再把 Signing Secret 保存为
-`RESEND_WEBHOOK_SECRET`。Webhook 未配置时仍可发信，但只能显示发信服务已接受请求。
+`email.complained`、`email.failed` 与 `email.suppressed`。单个 Resend 账户可把 Signing
+Secret 保存为 `RESEND_WEBHOOK_SECRET`。多个账户都使用同一端点，并把各账户生成的
+Signing Secret 以 JSON 数组保存为 `RESEND_WEBHOOK_SECRETS`：
+
+```json
+["whsec_account_one", "whsec_account_two"]
+```
+
+两个变量可以同时设置，便于从单账户配置迁移；重复值会自动去除。Webhook 未配置时
+仍可发信，但只能显示发信服务已接受请求。
 
 管理员可在 **账号设置 → 管理员二次验证** 中启用验证器应用。启用时生成的恢复码只
 显示一次；TOTP 密钥经过 `TOTP_ENCRYPTION_KEY` 加密后才写入 D1。更换此 Secret 前
 应先让管理员停用二次验证，否则旧密钥无法解密；恢复码仍可用于解除锁定。
 
-同一个 Worker 提供的前端会被自动允许，不需要设置 `APP_ORIGINS`。只有另一个
-Web 前端需要跨域调用 API 时才配置它；支持英文逗号分隔的精确来源，不能使用 `*`。
+同一个 Worker 提供的前端会被自动允许，不需要设置 `APP_ORIGINS`。主管理员可在
+**系统设置 → 官方浏览器扩展** 中直接允许 Chrome Web Store 固定版本；只有另一个
+Web 前端、开发版或其他扩展 ID 需要跨域调用 API 时才配置 `APP_ORIGINS`。它支持
+英文逗号分隔的精确来源，不能使用 `*`。
 Secret 只能保存在 Cloudflare Variables & Secrets，不要写入 GitHub 仓库。
 
-### Release Tag 自动更新
+### 版本检查与 Fork 更新
 
-连接 Cloudflare Workers Builds 的部署可以在 **系统设置 → 系统版本** 中安装最新正式
-Release。OmniMail 会在服务端重新读取 Release Tag、解析其提交 SHA，并让 production
-trigger 同时使用生产分支和该 SHA 构建，避免误装 Tag 之后的 `main` 分支代码。
+**系统设置 → 系统版本** 会检查最新正式 Release，但不会在应用内自动更新。发现新版本
+后，界面会引导管理员前往 GitHub 查看变更；请按照[后续同步上游更新](#后续同步上游更新)
+中的步骤，在自己的 Fork 页面选择 **Sync fork → Update branch**。Cloudflare Workers
+Builds 检测到分支更新后会自动构建、迁移并重新部署。
 
-自动更新只对主管理员开放，需要配置上表中的 `CLOUDFLARE_ACCOUNT_ID`、
-`CLOUDFLARE_BUILDS_TRIGGER_ID` 和 `CLOUDFLARE_BUILDS_API_TOKEN`。Token 应使用独立的
-user-scoped API Token，只授予 **Workers Builds Configuration: Edit**；不要复用全局
-API Key。连接仓库还必须包含 Release Tag 对应的提交，因此 Fork 或镜像仓库需要先
-同步该 Tag。
-
-本地 Clone 后直接运行 `wrangler deploy` 的安装没有远程构建执行器，版本检查仍然
-可用，但界面会自动降级为“查看更新”。修改过源码的 Fork 也建议手动合并、测试并
-部署，避免上游 Release 覆盖自定义改动。
+修改过源码且存在冲突的 Fork 应通过 Pull Request 手动合并、测试并部署，避免覆盖
+自定义改动。一键部署生成的独立快照没有 **Sync fork**，长期使用时建议迁移到 Fork
+部署；继续使用快照则需要自行合并上游更新。
 
 若要启用 Linux DO 登录，请在 [Linux DO Connect](https://connect.linux.do) 申请应用，
 将回调地址设置为 `https://你的域名/api/auth/linux-do/callback`，再配置上表两个变量。
 管理员随后可在 **系统设置 → 外部注册** 中选择“仅 Linux DO”。现有账号仍可使用
 邮箱密码登录；公开注册的新用户默认可在已启用域名中选择 1 个尚未占用的邮箱地址。
+
+若要启用独立的 **Linux DO 邮箱** 工作区，另行配置
+`LINUX_DO_MAIL_CREDENTIALS_KEY`。每个 OmniMail 用户可连接一个完整的 `@linux.do`
+邮箱用户名，并填写密码或认证令牌；推荐使用 Linux DO Mail 提供的可撤销专用令牌。
+工作区按用户操作读取 INBOX 最近 20 封邮件和单封正文，不执行后台同步。已连接账号可
+通过官方 SMTP 465 向单个收件人发信，`From` 固定为已验证的账号地址，并复用现有队列、
+幂等和限速保护；当前不支持附件或向服务器 Sent 文件夹追加副本。账号也可先验证再替换
+密码或认证令牌；验证失败时仍保留原凭据。
+
+若要启用独立的 **Gmail 聚合收件箱**，配置至少 32 字节的
+`GMAIL_CREDENTIALS_KEY`，部署并完成 D1 迁移。用户随后从左侧 Gmail 入口创建或粘贴一个
+Google 应用专用密码；连接验证成功后，Worker 会异步建立最近邮件索引。管理员可在
+**系统设置 → 邮箱功能入口** 中隐藏或恢复入口，隐藏不会删除已保存账号或索引。
+
+若要启用独立的 **Microsoft 邮箱**，配置至少 32 字节的
+`MICROSOFT_CREDENTIALS_KEY`，部署并应用 `0027_microsoft_imap.sql` 与
+`0028_microsoft_oauth_combination_password.sql`。用户使用 OAuth2 refresh token + Client ID
+连接；不再接受仅邮箱密码登录。四字段组合 password 经确认后独立加密留存，但不参与认证。
+Worker 只访问 Microsoft 官方 OAuth 与 IMAP 端点；批量导入文本会在浏览器中解析为结构化字段，
+不会发送给第三方服务。管理员同样可在 **系统设置 → 邮箱功能入口** 中隐藏入口。
+
+若要启用独立的 **QQ 邮箱聚合收件箱**，配置至少 32 字节的
+`QQ_MAIL_CREDENTIALS_KEY`，部署并应用到 `0030_qq_mail_smtp.sql`。用户需要先在 QQ 邮箱设置中
+开启 IMAP/SMTP 服务并生成授权码，再从左侧 QQ 邮箱入口连接个人 `@qq.com` 邮箱。
+升级到包含邮箱身份的版本时还会应用 `0031_qq_mail_identities.sql`；账号设置中可添加同一
+QQ 收件箱下的英文、Foxmail 或 VIP 地址，服务端会先验证 QQ SMTP 登录且不会发送测试邮件。
+管理员可在 **系统设置 → 邮箱功能入口** 中隐藏入口；隐藏不会删除账号、密文或索引。
+
+若要灰度启用独立的 **NAVER 邮箱聚合收件箱**，配置至少 32 字节的
+`NAVER_MAIL_CREDENTIALS_KEY` 并应用 `0033_naver_mail_imap.sql`。完成实际生产 Worker 登录和
+至少 24 小时低频稳定性观察前，保持 `NAVER_MAIL_IMAP_ENABLED=false`；验收通过后设为 `true`，
+再由管理员从 **系统设置 → 邮箱功能入口** 显式开放 NAVER 入口。用户只能连接个人
+`@naver.com` 邮箱，且必须使用 NAVER 应用专用密码。
+
+若要灰度启用独立的 **Yandex 邮箱聚合收件箱**，配置至少 32 字节的
+`YANDEX_MAIL_CREDENTIALS_KEY` 并应用 `0034_yandex_mail_imap.sql`。先保持
+`YANDEX_MAIL_IMAP_ENABLED=false` 完成实际 Worker 验证和至少 24 小时低频稳定性观察；验收后
+设为 `true`，再由管理员从 **系统设置 → 邮箱功能入口** 显式开放入口。首版仅接受个人
+`@yandex.com` 地址和 Yandex Mail 应用密码。
 
 ### 备份、保留与配额
 
@@ -396,7 +627,8 @@ SMTP 阶段返回 `Mailbox unavailable`，不会被写入 R2 或 D1。
 - `SUPER_ADMIN_EMAIL`
 - `SETUP_TOKEN`
 
-全部就绪后，填写显示名称、主管理员密码和 `SETUP_TOKEN`。创建成功后会自动进入
+`SETUP_TOKEN` 必须是至少 32 个 UTF-8 字节的随机 Secret。全部就绪后，填写显示
+名称、主管理员密码和 `SETUP_TOKEN`。创建成功后会自动进入
 三步部署向导，继续检查核心资源、身份安全和邮件服务。
 
 部署向导只返回配置状态，不返回 Secret 或环境变量值。Cloudflare Email Routing
@@ -450,6 +682,24 @@ OmniMail 的 Web 和桌面客户端共用同一套 JSON API：
 完整接口、鉴权、刷新令牌和分页格式见
 [`docs/API.md`](./docs/API.md)。
 
+## 浏览器悬浮扩展
+
+仓库内置 Chrome Manifest V3 扩展，可在普通网页显示隔离的 OmniMail 悬浮面板，
+支持跳转 OmniMail 网站授权、生成普通邮箱或 iCloud 隐藏地址、复制或填入当前网页，
+查看 OmniMail、iCloud、Linux DO、Gmail、Microsoft、QQ、NAVER 与 Yandex 邮箱的来信，
+并接收 OmniMail 新邮件通知。密码、MFA 和第三方邮箱凭据只由 OmniMail 网站处理，
+扩展通过 PKCE 一次性授权码获得可随时撤销的设备令牌。
+
+```powershell
+npm run build:extension
+```
+
+构建后在 `chrome://extensions/` 中加载 `dist-extension/`。开发版需要把扩展管理页
+显示的 ID 以 `chrome-extension://扩展ID` 形式加入 `APP_ORIGINS`；Chrome Web Store
+固定版本只需由主管理员在系统设置中开启，不需要配置该变量。
+完整安装步骤和安全边界见 [`extension/README.md`](./extension/README.md)，扩展的数据
+处理方式见 [`docs/EXTENSION_PRIVACY.md`](./docs/EXTENSION_PRIVACY.md)。
+
 ## 本地开发
 
 ### 安装
@@ -467,6 +717,8 @@ Copy-Item .env.example .env.local
 npm run dev:worker
 ```
 
+`dev:worker` 会在启动前自动将 `migrations/` 中尚未执行的迁移应用到本地 D1。
+
 ```powershell
 # Terminal 2: React Web
 npm run dev
@@ -479,19 +731,27 @@ npm run dev
 
 ```powershell
 npm run check:lines
+npm run lint
 npm run check
 npm test
+npm run test:worker
+npm run build:extension
+npm run test:extension
 npm run test:e2e
 npm run build
 npx wrangler deploy --dry-run
 ```
 
+`npm run test:extension` 的截图只写入 `test-results/`。需要主动更新 Chrome
+Web Store 素材时，运行 `npm run update:extension-store-assets`。
+
 最后一条命令只执行 Worker 打包验证，不会部署。CI 会在每次 Push 和 Pull Request
-中运行测试、类型检查、生产构建与 Wrangler dry-run。生产发布由已连接仓库的
+中运行测试、Hooks lint、类型检查、生产构建与 Wrangler dry-run。生产发布由已连接仓库的
 Cloudflare Workers Builds 自动执行。
 
-项目要求手写代码、测试和配置文件单文件不超过 600 行。自动生成的依赖锁文件和
-Wrangler 构建产物不计入限制。
+项目要求 Web 与扩展的 TypeScript 实现文件不超过 500 行，其他手写代码、测试和配置
+文件不超过 600 行。纯类型声明、翻译数据、自动生成的依赖锁文件和 Wrangler 构建产物
+不计入 500 行实现文件限制。
 
 ## 安全模型
 
@@ -500,8 +760,9 @@ Wrangler 构建产物不计入限制。
 - 浏览器会话只通过安全 Cookie 传递。
 - 管理员可启用 TOTP 二次验证；浏览器密码登录、Linux DO 登录和设备令牌签发使用
   同一套验证与限速策略，恢复码只保存摘要。
-- Access Token 短期有效，Refresh Token 轮换并仅保存摘要。
-- 登录、邮箱密码公开注册和邀请注册均有限速保护。
+- Access Token 短期有效，Refresh Token 轮换并仅保存摘要；刷新会继承原设备 Scope，
+  OmniMail Float 令牌只允许扩展实际使用的邮箱与邮件操作。
+- 登录、首次初始化、邮箱密码公开注册和邀请注册均有限速保护。
 - 邮箱密码公开注册和多人邀请使用 Turnstile 服务端校验；Linux DO 注册使用一次性
   OAuth state 和服务端授权码交换。
 - API 自动允许当前 Worker 同源请求；额外跨域来源必须在 `APP_ORIGINS` 中精确配置。

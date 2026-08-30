@@ -1,0 +1,125 @@
+.list-header {
+  display: flex;
+  min-height: 112px;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 22px 17px;
+}
+
+.list-header > div:first-child {
+  min-width: 0;
+}
+
+.list-header h1 {
+  margin: 0;
+  font-size: 27px;
+  line-height: 1.1;
+}
+
+.list-scroll-top-title {
+  display: block;
+  max-width: 100%;
+  min-height: 44px;
+  margin: -7px 0;
+  padding: 7px 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 160ms ease;
+}
+
+.list-scroll-top-title:hover { color: var(--text-secondary); }
+.list-scroll-top-title:focus-visible {
+  border-radius: 5px;
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.list-header__actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 7px;
+}
+
+.mailbox-list-header {
+  display: grid;
+  min-height: 132px;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: end;
+  justify-content: stretch;
+  gap: 8px;
+  padding: 24px 22px 17px;
+}
+
+.mailbox-list-header .list-header__scope-row,
+.mailbox-list-header .list-header__title-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mailbox-list-header .list-header__scope-row > .mailbox-switcher {
+  width: auto;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.mailbox-list-header .list-header__scope-row .mailbox-scope-trigger {
+  width: 100%;
+  min-width: 0;
+}
+
+.mailbox-list-header h1 {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 27px;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mailbox-list-header .list-header__utilities,
+.mailbox-list-header .list-header__actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 7px;
+}
+
+.mailbox-list-header .list-header__utilities {
+  display: none;
+  margin-left: auto;
+}
+
+@container mailbox-list (max-width: 360px) {
+  .mailbox-list-header {
+    min-height: 128px;
+    gap: 7px;
+    padding-inline: 17px;
+  }
+
+  .mailbox-list-header .list-header__title-row {
+    gap: 10px;
+  }
+
+  .mailbox-list-header .list-header__actions {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 760px) {
+  .mailbox-list-header .list-header__utilities {
+    display: flex;
+  }
+}

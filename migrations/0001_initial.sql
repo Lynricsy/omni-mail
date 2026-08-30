@@ -74,6 +74,10 @@ CREATE TABLE IF NOT EXISTS messages (
   processing_error TEXT,
   client_request_id TEXT UNIQUE,
   provider_id TEXT,
+  delivery_status TEXT CHECK (delivery_status IS NULL OR delivery_status IN (
+    'queued', 'sent', 'delivered', 'delayed', 'bounced', 'complained', 'failed', 'suppressed'
+  )),
+  provider_event_at INTEGER,
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
   UNIQUE (mailbox_address, message_id)

@@ -26,7 +26,7 @@ const config = {
 
 test('password login continues with an administrator TOTP challenge', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('omnimail-locale', 'zh-CN'))
-  await page.route('**/api/**', async (route) => {
+  await page.route('**://*/api/**', async (route) => {
     const request = route.request()
     const path = new URL(request.url()).pathname
     if (path === '/api/config') {
@@ -67,7 +67,7 @@ test('password login continues with an administrator TOTP challenge', async ({ p
 
 test('Linux DO can return directly to the pending TOTP challenge', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('omnimail-locale', 'zh-CN'))
-  await page.route('**/api/**', async (route) => {
+  await page.route('**://*/api/**', async (route) => {
     const path = new URL(route.request().url()).pathname
     if (path === '/api/config') {
       return route.fulfill({ contentType: 'application/json', body: JSON.stringify(config) })

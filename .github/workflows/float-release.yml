@@ -1,0 +1,96 @@
+name: Float Release
+
+on:
+  push:
+    tags: ["float-v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing Float release tag, for example float-v0.3.0
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: float-release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+      RELEASE_NOTES_PATH: docs/releases/float/${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}.md
+    steps:
+      - name: Checkout Float tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Verify independent Float version and release notes
+        id: version
+        shell: bash
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^float-v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "Tag must use float-vMAJOR.MINOR.PATCH" >&2
+            exit 1
+          fi
+
+          VERSION="${BASH_REMATCH[1]}"
+          MANIFEST_VERSION="$(node -p "JSON.parse(require('fs').readFileSync('extension/public/manifest.json', 'utf8')).version")"
+          if [ "$MANIFEST_VERSION" != "$VERSION" ]; then
+            echo "extension/public/manifest.json version $MANIFEST_VERSION does not match tag $RELEASE_TAG" >&2
+            exit 1
+          fi
+          if [ ! -s "$RELEASE_NOTES_PATH" ]; then
+            echo "Float release notes are missing or empty: $RELEASE_NOTES_PATH" >&2
+            exit 1
+          fi
+
+          git fetch origin main:refs/remotes/origin/main
+          git merge-base --is-ancestor "${RELEASE_TAG}^{commit}" origin/main
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - run: npm ci
+      - run: npm run build:extension
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:extension
+
+      - name: Package Float extension
+        id: extension
+        shell: bash
+        run: |
+          ASSET="$RUNNER_TEMP/omnimail-float-${{ steps.version.outputs.version }}.zip"
+          cd dist-extension
+          zip -q -r "$ASSET" .
+          echo "asset=$ASSET" >> "$GITHUB_OUTPUT"
+
+      - name: Publish Float GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXTENSION_ASSET: ${{ steps.extension.outputs.asset }}
+          VERSION: ${{ steps.version.outputs.version }}
+        shell: bash
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release edit "$RELEASE_TAG" \
+              --latest=false \
+              --title "OmniMail Float $VERSION" \
+              --notes-file "$RELEASE_NOTES_PATH"
+          else
+            gh release create "$RELEASE_TAG" \
+              --verify-tag \
+              --latest=false \
+              --title "OmniMail Float $VERSION" \
+              --notes-file "$RELEASE_NOTES_PATH"
+          fi
+          gh release upload "$RELEASE_TAG" "$EXTENSION_ASSET" --clobber

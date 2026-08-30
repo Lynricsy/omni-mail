@@ -1,0 +1,227 @@
+<!-- 此文件由 npm run docs:api 自动生成，请修改 src/features/api-guide/model/apiCatalog*.ts 后重新生成。 -->
+
+# 系统与公开入口
+
+**System and public entry points**
+
+健康检查、初始化、注册、邀请落地、代理与 Webhook。
+
+> Health, setup, registration, invitation, proxy, and webhook endpoints.
+
+本分类共 **8** 个端点。返回 [完整 API 索引](README.md) 或 [API 架构与安全说明](../API.md)。
+
+<!-- endpoint:GET /api/health catalog:0689a9c16a3c -->
+## `GET /api/health`
+
+**服务健康检查 / Service health check**
+
+确认 Worker 路由可以正常响应，不访问用户数据。
+
+> Confirm that the Worker route responds without reading user data.
+
+| 项目 | 内容 |
+| --- | --- |
+| 认证 | 公开，无需登录 |
+| 请求 | No parameters |
+| 成功响应 | 200 · { ok: true } |
+
+### cURL 示例
+
+```bash
+curl --request GET \
+  --url "https://mail.example.com/api/health"
+```
+
+<!-- endpoint:GET /api/config catalog:d0644e3e748a -->
+## `GET /api/config`
+
+**读取公开运行配置 / Read public runtime configuration**
+
+获取应用名称、注册方式、功能开关和部署就绪状态。
+
+> Read the app name, registration mode, feature flags, and deployment readiness.
+
+| 项目 | 内容 |
+| --- | --- |
+| 认证 | 公开，无需登录 |
+| 请求 | No parameters |
+| 成功响应 | 200 · AppConfig |
+
+### cURL 示例
+
+```bash
+curl --request GET \
+  --url "https://mail.example.com/api/config"
+```
+
+<!-- endpoint:POST /api/setup catalog:268c8f78984a -->
+## `POST /api/setup`
+
+**首次初始化主管理员 / Complete first-time owner setup**
+
+仅在实例未初始化时创建主管理员并写入登录 Cookie。
+
+> Create the owner and set a login cookie only while the instance is uninitialized.
+
+| 项目 | 内容 |
+| --- | --- |
+| 认证 | 公开，无需登录 |
+| 请求 | JSON · displayName, password, setupToken |
+| 成功响应 | 200 · { user } + Set-Cookie |
+
+> 注意：SETUP_TOKEN 至少 32 字节，完成初始化后应从 Worker Secret 中移除。
+>
+> Note: SETUP_TOKEN must be at least 32 bytes and should be removed after setup.
+
+### cURL 示例
+
+```bash
+curl --request POST \
+  --url "https://mail.example.com/api/setup" \
+  --header "Content-Type: application/json" \
+  --data '{
+  "displayName": "Owner",
+  "password": "strong-password",
+  "setupToken": "setup-secret"
+}'
+```
+
+<!-- endpoint:POST /api/register catalog:69506b744b1e -->
+## `POST /api/register`
+
+**外部注册普通账户 / Register a public account**
+
+在管理员允许注册且 Turnstile 验证通过时创建普通用户。
+
+> Create a regular user when public registration is enabled and Turnstile succeeds.
+
+| 项目 | 内容 |
+| --- | --- |
+| 认证 | 公开，无需登录 |
+| 请求 | JSON · email, displayName, password, turnstileToken |
+| 成功响应 | 201 · { user } + Set-Cookie |
+
+### cURL 示例
+
+```bash
+curl --request POST \
+  --url "https://mail.example.com/api/register" \
+  --header "Content-Type: application/json" \
+  --data '{
+  "email": "user@example.com",
+  "displayName": "User",
+  "password": "strong-password",
+  "turnstileToken": "turnstile-token"
+}'
+```
+
+<!-- endpoint:GET /api/invitations/:token catalog:670b9fa6b6b5 -->
+## `GET /api/invitations/{token}`
+
+**预览邀请链接 / Preview an invitation**
+
+读取邀请状态、域名、地址模式和账户策略，不消耗邀请次数。
+
+> Read invitation status, domain, address mode, and policy without consuming a use.
+
+| 项目 | 内容 |
+| --- | --- |
+| 认证 | 公开，无需登录 |
+| 请求 | Path · token |
+| 成功响应 | 200 · { invite } |
+
+### cURL 示例
+
+```bash
+curl --request GET \
+  --url "https://mail.example.com/api/invitations/invite_token"
+```
+
+<!-- endpoint:POST /api/invitations/:token catalog:196c4243f713 -->
+## `POST /api/invitations/{token}`
+
+**接受邀请并创建账户 / Accept an invitation and create an account**
+
+按邀请策略创建用户和邮箱地址，随后使用登录接口进入账户。
+
+> Create a user and mailbox under the invitation policy, then use the login endpoint to sign in.
+
+| 项目 | 内容 |
+| --- | --- |
+| 认证 | 公开，无需登录 |
+| 请求 | JSON · displayName, localPart?, password, turnstileToken? |
+| 成功响应 | 201 · { email } |
+
+### cURL 示例
+
+```bash
+curl --request POST \
+  --url "https://mail.example.com/api/invitations/invite_token" \
+  --header "Content-Type: application/json" \
+  --data '{
+  "displayName": "Invited User",
+  "localPart": "user",
+  "password": "strong-password",
+  "turnstileToken": "turnstile-token"
+}'
+```
+
+<!-- endpoint:GET /api/remote-images catalog:606ef51fd79e -->
+## `GET /api/remote-images`
+
+**代理安全远程图片 / Proxy a safe remote image**
+
+通过 Worker 拉取 HTTPS 邮件图片，限制跳转、类型和大小。
+
+> Fetch an HTTPS mail image through the Worker with redirect, type, and size limits.
+
+| 项目 | 内容 |
+| --- | --- |
+| 认证 | 登录用户；支持 Session Cookie 或 Access Token |
+| 请求 | Query · url=https://images.example/image.png |
+| 成功响应 | 200 · image bytes |
+
+### cURL 示例
+
+```bash
+curl --request GET \
+  --url "https://mail.example.com/api/remote-images?url=https%3A%2F%2Fimages.example%2Fimage.png" \
+  --header "Authorization: Bearer om_at_..." \
+  --output "image.png"
+```
+
+<!-- endpoint:POST /api/webhooks/resend catalog:5266b9d048d4 -->
+## `POST /api/webhooks/resend`
+
+**接收 Resend 投递事件 / Receive Resend delivery events**
+
+验证 Svix 签名后更新已发送邮件的投递状态。
+
+> Verify the Svix signature, then update outbound delivery state.
+
+| 项目 | 内容 |
+| --- | --- |
+| 认证 | Webhook 签名验证 |
+| 请求 | Headers · svix-id, svix-timestamp, svix-signature; JSON event |
+| 成功响应 | 200 · { ok: true } |
+
+> 注意：签名必须由 Resend 生成，示例占位值不能用于真实请求。
+>
+> Note: The signature must be generated by Resend; the placeholders are not valid signatures.
+
+### cURL 示例
+
+```bash
+curl --request POST \
+  --url "https://mail.example.com/api/webhooks/resend" \
+  --header "svix-id: msg_..." \
+  --header "svix-timestamp: 1700000000" \
+  --header "svix-signature: v1,..." \
+  --header "Content-Type: application/json" \
+  --data '{
+  "type": "email.delivered",
+  "data": {
+    "email_id": "resend_email_id"
+  }
+}'
+```

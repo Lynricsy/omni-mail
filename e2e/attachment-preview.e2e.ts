@@ -13,7 +13,7 @@ test('previews PDF and image attachments while unsupported files stay downloads'
     localStorage.setItem('omnimail.deployment-guide.v1', 'seen')
     localStorage.setItem('omnimail-locale', 'zh-CN')
   })
-  await page.route('**/api/**', async (route) => {
+  await page.route('**://*/api/**', async (route) => {
     const requestUrl = new URL(route.request().url())
     const { pathname } = requestUrl
     if (pathname === '/api/config') return json(route, {

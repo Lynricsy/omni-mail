@@ -1,0 +1,232 @@
+.mail-layout {
+  display: grid;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  grid-template-columns: 230px minmax(320px, 370px) minmax(0, 1fr);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.mail-sidebar {
+  --sidebar-padding-inline: 16px;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  padding: 24px var(--sidebar-padding-inline) 16px;
+  overflow: hidden;
+  border-right: 1px solid var(--line);
+  background: var(--surface-muted);
+}
+
+.sidebar-brand {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0 14px;
+}
+
+.sidebar-brand-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.sidebar-brand-links .icon-button {
+  width: 30px;
+  height: 30px;
+}
+
+.sidebar-navigation {
+  display: flex; min-width: 0; min-height: 0; flex: 1 1 auto;
+  align-self: stretch; flex-direction: column;
+  margin-inline: calc(var(--sidebar-padding-inline) * -1);
+  padding: 0 var(--sidebar-padding-inline) 10px;
+  overflow-x: hidden; overflow-y: scroll; overscroll-behavior: contain;
+}
+
+.folder-nav {
+  display: grid;
+  gap: 5px;
+}
+
+.folder-nav button,
+.admin-nav button,
+.account-nav button {
+  display: grid;
+  min-height: 44px;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-align: left;
+  transition: color 180ms ease, background 180ms ease;
+}
+
+.folder-nav button:hover,
+.admin-nav button:hover,
+.account-nav button:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.folder-nav button.is-active,
+.admin-nav button.is-active,
+.account-nav button.is-active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.folder-nav button span,
+.admin-nav button span,
+.account-nav button span {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-nav {
+  display: grid;
+  gap: 5px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.admin-nav-toggle {
+  display: none;
+}
+
+.account-nav {
+  display: grid;
+  gap: 5px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.account-nav-secondary {
+  display: contents;
+}
+
+.folder-nav button small {
+  min-width: 20px;
+  color: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: right;
+  opacity: 0.72;
+}
+
+.sidebar-account {
+  display: grid;
+  min-width: 0;
+  flex: 0 0 auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: 0;
+  padding: 10px 10px 5px;
+  border-top: 1px solid var(--line);
+}
+
+.sidebar-theme {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 0 10px 22px;
+}
+
+.sidebar-theme .theme-selector {
+  gap: 1px;
+}
+
+.sidebar-theme .theme-selector button {
+  width: 26px;
+}
+
+.sidebar-notification-toggle {
+  display: grid;
+  width: 34px;
+  height: 38px;
+  flex: 0 0 auto;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-muted);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+
+.sidebar-notification-toggle:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.sidebar-notification-toggle:active {
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.account-avatar,
+.sender-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 700;
+}
+
+.account-avatar {
+  width: 34px;
+  height: 34px;
+  font-size: 12px;
+}
+
+.sidebar-account > div {
+  display: grid;
+  min-width: 0;
+}
+
+.sidebar-account strong,
+.sidebar-account span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-account strong {
+  font-size: 12px;
+}
+
+.sidebar-account div span {
+  color: var(--text-tertiary);
+  font-size: 10px;
+}
+
+.account-role {
+  width: fit-content;
+  margin-top: 4px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+  font-size: 8px;
+  font-weight: 600;
+}

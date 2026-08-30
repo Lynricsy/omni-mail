@@ -11,6 +11,7 @@ const owner = {
 }
 
 const userOwner = { id: 'user-2', email: 'person@example.com', displayName: 'Person' }
+const pageReadyTimeout = 10_000
 
 function summary(folder: 'inbox' | 'trash') {
   return {
@@ -30,13 +31,14 @@ async function mockAdminMail(page: Page, role: 'super_admin' | 'admin' = 'super_
     visible: true,
     actions: [] as string[],
     personalUpdates: 0,
+    proxiedImageSource: '',
   }
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.addInitScript(() => {
     localStorage.setItem('omnimail.deployment-guide.v1', 'seen')
     localStorage.setItem('omnimail-locale', 'zh-CN')
   })
-  await page.route('**/api/**', async (route) => {
+  await page.route('**://*/api/**', async (route) => {
     const request = route.request()
     const path = new URL(request.url()).pathname
     if (path === '/api/config') return json(route, {
@@ -45,7 +47,7 @@ async function mockAdminMail(page: Page, role: 'super_admin' | 'admin' = 'super_
       registrationMethod: 'password', linuxDoLoginEnabled: false,
       registrationDomainPolicy: { mode: 'blocklist', domains: [] },
       registrationProtectionReady: false, turnstileSiteKey: '', mailRefreshInterval: 0,
-      remoteImagesEnabled: false, unassignedMailEnabled: false, superAdminEmail: owner.email,
+      remoteImagesEnabled: true, unassignedMailEnabled: false, superAdminEmail: owner.email,
       setupRequirements: { databaseReady: true, storageReady: true, queueReady: true,
         superAdminReady: true, setupTokenReady: false },
     })
@@ -69,7 +71,9 @@ async function mockAdminMail(page: Page, role: 'super_admin' | 'admin' = 'super_
       return json(route, {
         message: {
           ...summary(state.folder), messageId: null, inReplyTo: null, references: null,
-          cc: [], text: 'Administrative read-only body.', html: '', attachments: [],
+          cc: [], text: 'Administrative read-only body.',
+          html: '<p>Administrative read-only body.</p><img class="admin-remote-image" src="https://assets.example.net/admin.png" alt="Remote admin asset">',
+          attachments: [],
         },
         thread: [summary(state.folder)],
       })
@@ -82,6 +86,13 @@ async function mockAdminMail(page: Page, role: 'super_admin' | 'admin' = 'super_
       if (input.action === 'delete') state.visible = false
       return json(route, { ok: true, updatedCount: 1 })
     }
+    if (path === '/api/remote-images') {
+      state.proxiedImageSource = new URL(request.url()).searchParams.get('url') ?? ''
+      return route.fulfill({
+        contentType: 'image/gif',
+        body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64'),
+      })
+    }
     return json(route, { error: `Unhandled ${request.method()} ${path}` }, 404)
   })
   return state
@@ -89,16 +100,28 @@ async function mockAdminMail(page: Page, role: 'super_admin' | 'admin' = 'super_
 
 test('owner can inspect and manage another user message without changing read state', async ({ page }) => {
   const state = await mockAdminMail(page)
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
   await page.goto('/admin/mail')
 
-  await expect(page.getByRole('heading', { name: '邮件管理' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '邮件管理' }))
+    .toBeVisible({ timeout: pageReadyTimeout })
   await expect(page.getByText('person@example.com')).toBeVisible()
   await page.getByRole('button', { name: 'Private project update' }).click()
-  await expect(page.getByRole('dialog', { name: '全站邮件详情' })).toContainText(
-    'Administrative read-only body.',
-  )
-  await expect(page.getByRole('dialog', { name: '全站邮件详情' })).toContainText('Person')
+  const backdrop = page.locator('.admin-mail-drawer-backdrop')
+  const dialog = page.getByRole('dialog', { name: '全站邮件详情' })
+  const messageFrame = page.frameLocator('.admin-mail-drawer iframe')
+  await expect(backdrop).toHaveAttribute('data-state', 'open')
+  await expect(messageFrame.locator('body')).toContainText('Administrative read-only body.')
+  await expect(dialog).toContainText('Person')
+  await expect.poll(() => state.proxiedImageSource).toBe('https://assets.example.net/admin.png')
+  await expect.poll(() => messageFrame.locator('.admin-remote-image').evaluate((image) => (
+      (image as HTMLImageElement).naturalWidth
+    ))).toBe(1)
   expect(state.personalUpdates).toBe(0)
+  await dialog.getByRole('button', { name: '关闭' }).click()
+  await expect(backdrop).toHaveAttribute('data-state', 'closing')
+  await expect(backdrop).toHaveCount(0)
+  await page.getByRole('button', { name: 'Private project update' }).click()
   await page.getByRole('dialog', { name: '全站邮件详情' })
     .getByRole('button', { name: '移入垃圾箱' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: '移入垃圾箱' }).click()
@@ -125,6 +148,7 @@ test('mail management stays within a mobile viewport', async ({ page }) => {
   await mockAdminMail(page)
   await page.goto('/admin/mail')
 
-  await expect(page.getByRole('heading', { name: '邮件管理' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '邮件管理' }))
+    .toBeVisible({ timeout: pageReadyTimeout })
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375)
 })

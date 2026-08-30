@@ -1,0 +1,175 @@
+name: Android Release
+
+on:
+  push:
+    tags: ["android-v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Android version without the prefix, for example 0.1.0
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-release-${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && format('android-v{0}', inputs.version) || github.ref_name }}
+      RELEASE_NOTES_PATH: docs/releases/android/${{ github.event_name == 'workflow_dispatch' && format('android-v{0}', inputs.version) || github.ref_name }}.md
+    steps:
+      - name: Checkout Android tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || github.ref }}
+          fetch-depth: 0
+
+      - name: Resolve independent Android version
+        id: version
+        shell: bash
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^android-v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo "Tag must use android-vMAJOR.MINOR.PATCH" >&2
+            exit 1
+          fi
+
+          MAJOR=$((10#${BASH_REMATCH[1]}))
+          MINOR=$((10#${BASH_REMATCH[2]}))
+          PATCH=$((10#${BASH_REMATCH[3]}))
+          if (( MINOR > 999 || PATCH > 999 )); then
+            echo "Android minor and patch versions must be below 1000" >&2
+            exit 1
+          fi
+
+          VERSION="$MAJOR.$MINOR.$PATCH"
+          VERSION_CODE=$((MAJOR * 1000000 + MINOR * 1000 + PATCH))
+          if (( VERSION_CODE < 1 || VERSION_CODE > 2100000000 )); then
+            echo "Calculated Android versionCode is outside the supported range" >&2
+            exit 1
+          fi
+
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            git fetch origin main:refs/remotes/origin/main
+            git merge-base --is-ancestor "${RELEASE_TAG}^{commit}" origin/main
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+          echo "OMNIMAIL_ANDROID_VERSION_NAME=$VERSION" >> "$GITHUB_ENV"
+          echo "OMNIMAIL_ANDROID_VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
+
+      - name: Verify Android release notes
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          if [ ! -s "$RELEASE_NOTES_PATH" ]; then
+            echo "Android release notes are missing or empty: $RELEASE_NOTES_PATH" >&2
+            exit 1
+          fi
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-provider: basic
+
+      - name: Install Android SDK 36
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Restore release signing key
+        env:
+          OMNIMAIL_ANDROID_KEYSTORE_BASE64: ${{ secrets.OMNIMAIL_ANDROID_KEYSTORE_BASE64 }}
+          OMNIMAIL_ANDROID_SIGNING_STORE_PASSWORD: ${{ secrets.OMNIMAIL_ANDROID_SIGNING_STORE_PASSWORD }}
+          OMNIMAIL_ANDROID_SIGNING_KEY_ALIAS: ${{ secrets.OMNIMAIL_ANDROID_SIGNING_KEY_ALIAS }}
+          OMNIMAIL_ANDROID_SIGNING_KEY_PASSWORD: ${{ secrets.OMNIMAIL_ANDROID_SIGNING_KEY_PASSWORD }}
+        shell: bash
+        run: |
+          for NAME in \
+            OMNIMAIL_ANDROID_KEYSTORE_BASE64 \
+            OMNIMAIL_ANDROID_SIGNING_STORE_PASSWORD \
+            OMNIMAIL_ANDROID_SIGNING_KEY_ALIAS \
+            OMNIMAIL_ANDROID_SIGNING_KEY_PASSWORD
+          do
+            if [ -z "${!NAME:-}" ]; then
+              echo "Missing GitHub Actions secret: $NAME" >&2
+              exit 1
+            fi
+          done
+
+          KEYSTORE_PATH="$RUNNER_TEMP/omnimail-android-release.jks"
+          printf '%s' "$OMNIMAIL_ANDROID_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+          chmod 600 "$KEYSTORE_PATH"
+          echo "OMNIMAIL_ANDROID_SIGNING_STORE_FILE=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+
+      - name: Test, lint, and build signed APK
+        working-directory: android
+        env:
+          OMNIMAIL_ANDROID_SIGNING_STORE_PASSWORD: ${{ secrets.OMNIMAIL_ANDROID_SIGNING_STORE_PASSWORD }}
+          OMNIMAIL_ANDROID_SIGNING_KEY_ALIAS: ${{ secrets.OMNIMAIL_ANDROID_SIGNING_KEY_ALIAS }}
+          OMNIMAIL_ANDROID_SIGNING_KEY_PASSWORD: ${{ secrets.OMNIMAIL_ANDROID_SIGNING_KEY_PASSWORD }}
+        run: ./gradlew --no-daemon testDebugUnitTest compileDebugAndroidTestKotlin lintRelease assembleRelease
+
+      - name: Verify and package signed APK
+        id: apk
+        shell: bash
+        run: |
+          SOURCE_APK="android/app/build/outputs/apk/release/app-release.apk"
+          test -f "$SOURCE_APK"
+
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -x "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs "$SOURCE_APK"
+
+          APK_PATH="$RUNNER_TEMP/omnimail-android-${{ steps.version.outputs.version }}.apk"
+          CHECKSUM_PATH="$APK_PATH.sha256"
+          cp "$SOURCE_APK" "$APK_PATH"
+          (
+            cd "$RUNNER_TEMP"
+            sha256sum "$(basename "$APK_PATH")" > "$(basename "$CHECKSUM_PATH")"
+          )
+          echo "apk_path=$APK_PATH" >> "$GITHUB_OUTPUT"
+          echo "checksum_path=$CHECKSUM_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: omnimail-android-${{ steps.version.outputs.version }}-signed
+          path: |
+            ${{ steps.apk.outputs.apk_path }}
+            ${{ steps.apk.outputs.checksum_path }}
+          if-no-files-found: error
+
+      - name: Publish Android GitHub Release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APK_PATH: ${{ steps.apk.outputs.apk_path }}
+          CHECKSUM_PATH: ${{ steps.apk.outputs.checksum_path }}
+          VERSION: ${{ steps.version.outputs.version }}
+        shell: bash
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release edit "$RELEASE_TAG" \
+              --title "OmniMail Android $VERSION" \
+              --notes-file "$RELEASE_NOTES_PATH"
+          else
+            gh release create "$RELEASE_TAG" \
+              --verify-tag \
+              --latest=false \
+              --title "OmniMail Android $VERSION" \
+              --notes-file "$RELEASE_NOTES_PATH"
+          fi
+          gh release upload "$RELEASE_TAG" "$APK_PATH" "$CHECKSUM_PATH" --clobber

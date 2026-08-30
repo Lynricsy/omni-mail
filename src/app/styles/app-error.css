@@ -1,0 +1,72 @@
+.app-crash {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 20%, color-mix(in srgb, var(--danger) 8%, transparent), transparent 42%),
+    var(--background);
+}
+
+.app-crash__card {
+  display: flex;
+  width: min(440px, 100%);
+  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+  padding: 36px 28px;
+  border: 1px solid var(--line-strong);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.app-crash__icon {
+  display: inline-flex;
+  width: 56px;
+  height: 56px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.app-crash__eyebrow {
+  margin: 4px 0 -4px;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.app-crash h1 {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(22px, 5vw, 28px);
+  letter-spacing: -0.025em;
+}
+
+.app-crash__card > p:not(.app-crash__eyebrow) {
+  max-width: 360px;
+  margin: 0 0 4px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.app-crash .button {
+  min-height: 44px;
+}
+
+.app-crash small {
+  color: var(--text-tertiary);
+  font-size: 10px;
+}
+
+@media (max-width: 480px) {
+  .app-crash { padding: 16px; }
+  .app-crash__card { padding: 28px 20px; }
+}

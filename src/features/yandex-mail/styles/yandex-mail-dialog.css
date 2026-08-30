@@ -1,0 +1,1 @@
+body:has(.yandex-mail-dialog-backdrop) > .mail-delete-backdrop { z-index: 1100; }

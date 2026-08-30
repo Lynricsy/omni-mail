@@ -1,0 +1,447 @@
+body:has(.gmail-dialog-backdrop) > .mail-delete-backdrop { z-index: 1100; }
+
+.gmail-dialog-backdrop {
+  z-index: 1000;
+  overscroll-behavior: contain;
+  backdrop-filter: blur(8px);
+  transition: opacity 180ms ease-out;
+}
+
+.gmail-dialog-backdrop .gmail-account-dialog {
+  transform: translateY(16px) scale(0.98);
+  transition: opacity 190ms ease-out, transform 230ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.gmail-dialog-backdrop.is-closing {
+  pointer-events: none;
+  transition-duration: 150ms;
+  transition-timing-function: ease-in;
+}
+
+.gmail-dialog-backdrop.is-closing .gmail-account-dialog {
+  transition-duration: 140ms, 160ms;
+  transition-timing-function: ease-in, cubic-bezier(0.4, 0, 1, 1);
+}
+
+.gmail-account-dialog { width: min(620px, 100%); }
+
+.gmail-account-dialog > header .eyebrow {
+  margin: 0 0 5px;
+  color: var(--text-tertiary);
+  font-size: 9px;
+  letter-spacing: 0.13em;
+}
+
+.gmail-account-dialog > header:not(.has-back) > div { flex: 1 1 auto; }
+
+.gmail-account-dialog > header.has-back {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  align-items: start;
+  gap: 10px;
+}
+
+.gmail-dialog-back { margin-top: 1px; }
+
+.gmail-dialog-feedback {
+  display: grid;
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+.gmail-dialog-feedback .inline-error { margin: 0; }
+
+.gmail-dialog-notice,
+.gmail-account-detail-error,
+.gmail-account-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  line-height: 1.55;
+}
+
+.gmail-dialog-notice {
+  padding: 10px 11px;
+  border-radius: 11px;
+  background: var(--success-soft);
+  color: var(--success);
+  font-size: 11px;
+}
+
+.gmail-dialog-notice svg,
+.gmail-account-detail-error svg,
+.gmail-account-note svg { flex: 0 0 auto; margin-top: 1px; }
+
+.gmail-account-list,
+.gmail-account-settings { display: grid; gap: 14px; }
+.gmail-account-card__icon,
+.gmail-account-summary__icon,
+.gmail-account-section-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+
+.gmail-connect-form { gap: 14px; }
+.gmail-connect-form > footer.gmail-connect-actions { justify-content: flex-end; gap: 9px; }
+.gmail-connect-actions .button { min-width: 150px; min-height: 44px; }
+.gmail-connect-form label > small {
+  color: var(--text-tertiary);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.gmail-password-input { position: relative; display: block; }
+.gmail-password-input input { padding-right: 48px; }
+.gmail-password-input button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.gmail-password-input button:hover { color: var(--text); }
+.gmail-password-input button:focus-visible {
+  border-radius: 9px;
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
+}
+
+.gmail-account-list__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.gmail-account-list__empty {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 28px 18px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 15px;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+.gmail-account-list__empty strong { color: var(--text); font-size: 13px; }
+.gmail-account-list__empty span { font-size: 11px; }
+
+.gmail-account-card {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+.gmail-account-card:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-muted);
+}
+.gmail-account-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.gmail-account-card__icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--surface-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.gmail-account-card__content,
+.gmail-account-card__side,
+.gmail-account-summary > span:nth-child(2),
+.gmail-account-section-heading > span:last-child,
+.gmail-account-action > span,
+.gmail-account-danger > span { display: grid; min-width: 0; gap: 3px; }
+
+.gmail-account-card__content strong,
+.gmail-account-card__content small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gmail-account-card__content strong { font-size: 13px; }
+.gmail-account-card__content small { color: var(--text-tertiary); font-size: 10px; }
+.gmail-account-card__content .gmail-account-error { color: var(--danger); }
+
+.gmail-account-card__side { justify-items: end; gap: 8px; }
+.gmail-account-card__side > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.gmail-account-card__side em,
+.gmail-account-summary em {
+  display: inline-flex;
+  min-height: 22px;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--success-soft);
+  color: var(--success);
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 680;
+  white-space: nowrap;
+}
+.gmail-account-card__side em.is-error,
+.gmail-account-card__side em.is-credential_error,
+.gmail-account-summary em.is-error,
+.gmail-account-summary em.is-credential_error { background: var(--danger-soft); color: var(--danger); }
+.gmail-account-card__side em.is-syncing,
+.gmail-account-summary em.is-syncing { background: var(--warning-soft); color: var(--warning); }
+
+.gmail-account-summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-muted);
+}
+.gmail-account-summary__icon { width: 38px; height: 38px; border-radius: 11px; }
+.gmail-account-summary strong,
+.gmail-account-section-heading strong,
+.gmail-account-action strong,
+.gmail-account-danger strong { overflow-wrap: anywhere; color: var(--text); font-size: 13px; }
+.gmail-account-summary small,
+.gmail-account-section-heading small,
+.gmail-account-action small,
+.gmail-account-danger small { color: var(--text-tertiary); font-size: 10px; line-height: 1.5; }
+
+.gmail-account-detail-error {
+  padding: 10px 11px;
+  border-radius: 11px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 11px;
+}
+
+.gmail-account-rename,
+.gmail-account-credential {
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface-muted) 58%, var(--surface));
+}
+
+.gmail-account-section-heading { display: flex; align-items: center; gap: 9px; }
+.gmail-account-section-icon { width: 32px; height: 32px; border-radius: 9px; }
+
+.gmail-account-rename__field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 9px;
+}
+.gmail-account-rename__field .button { min-width: 116px; min-height: 44px; }
+
+.gmail-account-action,
+.gmail-account-danger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+.gmail-account-action + .gmail-account-action { margin-top: -14px; }
+.gmail-account-action .button,
+.gmail-account-danger .button { min-width: 112px; min-height: 44px; flex: 0 0 auto; }
+
+.mail-sync-limit {
+  display: grid;
+  min-width: 180px;
+  gap: 5px;
+  color: var(--text);
+  text-align: left;
+}
+.mail-sync-limit > span { font-size: 11px; font-weight: 650; }
+.mail-sync-limit__select { position: relative; width: 100%; }
+.mail-sync-limit__trigger {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: 0;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 620;
+  text-align: left;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+.mail-sync-limit__trigger:hover:not(:disabled),
+.mail-sync-limit__trigger:focus-visible,
+.mail-sync-limit__select.is-open .mail-sync-limit__trigger {
+  border-color: var(--line-strong);
+  background: var(--surface-muted);
+}
+.mail-sync-limit__trigger:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  outline-offset: 1px;
+}
+.mail-sync-limit__trigger:disabled { cursor: wait; opacity: 0.62; }
+.mail-sync-limit__trigger > svg { color: var(--text-tertiary); transition: transform 180ms ease; }
+.mail-sync-limit__select.is-open .mail-sync-limit__trigger > svg { transform: rotate(180deg); }
+.mail-sync-limit__menu {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  display: grid;
+  gap: 3px;
+  padding: 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: 13px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  animation: compose-mailbox-menu-in 150ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.mail-sync-limit__menu > button {
+  display: grid;
+  width: 100%;
+  min-height: 46px;
+  grid-template-columns: minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: background 150ms ease, color 150ms ease;
+}
+.mail-sync-limit__menu > button:hover,
+.mail-sync-limit__menu > button:focus-visible { outline: 0; background: var(--surface-muted); }
+.mail-sync-limit__menu > button:focus-visible {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 38%, transparent);
+}
+.mail-sync-limit__menu > button.is-selected {
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+}
+.mail-sync-limit__menu > button > span { display: grid; min-width: 0; gap: 2px; }
+.mail-sync-limit__menu strong,
+.mail-sync-limit__menu small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mail-sync-limit__menu strong { font-size: 13px; font-weight: 650; }
+.mail-sync-limit__menu small { color: var(--text-tertiary); font-size: 10px; font-weight: 580; }
+.mail-sync-limit__menu > button > svg { color: var(--accent); }
+.mail-sync-limit small {
+  max-width: 30ch;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.gmail-account-sync-controls {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: end;
+  gap: 10px;
+}
+.gmail-account-sync-controls .mail-sync-limit { min-width: 164px; }
+
+.gmail-account-note { color: var(--text-tertiary); font-size: 11px; }
+.gmail-account-note svg { color: var(--success); }
+.gmail-account-credential > footer { justify-content: flex-start; }
+.gmail-account-credential > footer .button { min-height: 44px; }
+.gmail-account-danger { margin-top: 1px; }
+
+.gmail-delete-confirm {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--danger) 25%, var(--line));
+  border-radius: 12px;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.gmail-delete-confirm p { margin: 0; font-size: 11px; line-height: 1.55; }
+.gmail-delete-confirm > span { display: flex; justify-content: flex-end; gap: 8px; }
+.gmail-delete-confirm .button { min-height: 40px; }
+
+@media (max-width: 760px) {
+  .gmail-dialog-backdrop .gmail-account-dialog {
+    transform: translateY(24px) scale(0.99);
+  }
+  .gmail-account-dialog { width: 100%; }
+  .gmail-account-dialog > header.has-back { grid-template-columns: 38px minmax(0, 1fr) 38px; }
+  .gmail-connect-form > footer.gmail-connect-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 8px;
+  }
+  .gmail-connect-actions .button {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 8px;
+    font-size: 11px;
+    line-height: 1.35;
+    text-align: center;
+    white-space: normal;
+  }
+  .gmail-account-card { grid-template-columns: 38px minmax(0, 1fr); }
+  .gmail-account-card__icon { width: 38px; height: 38px; }
+  .gmail-account-card__side { grid-column: 2; grid-template-columns: auto 1fr; align-items: center; justify-items: start; }
+  .gmail-account-summary { grid-template-columns: 38px minmax(0, 1fr); }
+  .gmail-account-summary em { grid-column: 2; justify-self: start; }
+  .gmail-account-rename__field { grid-template-columns: 1fr; }
+  .gmail-account-rename__field .button { width: 100%; }
+  .gmail-account-sync-controls { width: 100%; align-items: stretch; flex-direction: column; }
+  .gmail-account-sync-controls .mail-sync-limit { width: 100%; }
+  .gmail-account-sync-controls .button { width: 100%; }
+  .gmail-account-action,
+  .gmail-account-danger { align-items: stretch; flex-direction: column; gap: 10px; }
+  .gmail-account-action .button,
+  .gmail-account-danger .button { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gmail-dialog-backdrop,
+  .gmail-dialog-backdrop .gmail-account-dialog,
+  .gmail-account-card { transition: none; }
+}

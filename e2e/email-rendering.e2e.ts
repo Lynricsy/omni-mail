@@ -9,6 +9,7 @@ function json(route: Route, body: unknown) {
 }
 
 test('slow remote images do not block readable email content', async ({ page }) => {
+  const subject = 'Time to RSVP: Apple Invites is ready to download.'
   let proxiedImageSource = ''
   let releaseRemoteImage!: () => void
   const remoteImageGate = new Promise<void>((resolve) => {
@@ -20,7 +21,7 @@ test('slow remote images do not block readable email content', async ({ page }) 
     localStorage.setItem('omnimail.deployment-guide.v1', 'seen')
     localStorage.setItem('omnimail-locale', 'zh-CN')
   })
-  await page.route('**/api/**', async (route) => {
+  await page.route('**://*/api/**', async (route) => {
     const request = route.request()
     const path = new URL(request.url()).pathname
     if (path === '/api/config') return json(route, {
@@ -46,6 +47,7 @@ test('slow remote images do not block readable email content', async ({ page }) 
     if (path === '/api/messages/message-1') return json(route, {
       message: {
         ...message, messageId: null, inReplyTo: null, references: null,
+        subject,
         cc: [], text: 'Readable before the image',
         html: `
           <style>
@@ -90,6 +92,58 @@ test('slow remote images do not block readable email content', async ({ page }) 
     await page.mouse.wheel(0, 120)
     await expect(reader).toHaveClass(/is-scrollbar-active/)
     await expect(reader).not.toHaveClass(/is-scrollbar-active/, { timeout: 2_000 })
+    const toolbarTypewriter = page.locator('.reader-toolbar__typewriter')
+    await reader.evaluate((element) => { element.scrollTop = 0 })
+    await expect(toolbarTypewriter).toHaveText('邮件详情')
+    await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'no-preference' })
+    await reader.evaluate((element) => { element.scrollTop = element.scrollHeight })
+    const toolbarSubject = page.getByRole('button', { name: `回到顶部：${subject}` })
+    const scrollTopButton = page.locator('.reader-scroll-top')
+    await expect(toolbarSubject).toBeVisible()
+    await expect(toolbarTypewriter).toHaveClass(/is-typing/)
+    await expect(toolbarTypewriter).toHaveText(subject)
+    await expect(toolbarTypewriter).not.toHaveClass(/is-typing/)
+    await expect(scrollTopButton).toHaveClass(/is-visible/)
+    await toolbarSubject.click()
+    await expect.poll(() => reader.evaluate((element) => element.scrollTop)).toBe(0)
+    await expect(toolbarSubject).toHaveCount(0)
+    await expect(toolbarTypewriter).toHaveClass(/is-typing/)
+    await expect(toolbarTypewriter).toHaveText('邮件详情')
+    await expect(toolbarTypewriter).not.toHaveClass(/is-typing/)
+    await reader.evaluate((element) => { element.scrollTop = element.scrollHeight })
+    await expect(toolbarTypewriter).toHaveClass(/is-typing/)
+    await reader.evaluate((element) => { element.scrollTop = 0 })
+    await expect(toolbarSubject).toHaveCount(0)
+    await expect(toolbarTypewriter).toHaveText('邮件详情')
+    await expect(toolbarTypewriter).not.toHaveClass(/is-typing/)
+    await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' })
+    await reader.evaluate((element) => { element.scrollTop = element.scrollHeight })
+    await expect(toolbarTypewriter).toHaveText(subject)
+    await expect(toolbarTypewriter).not.toHaveClass(/is-typing/)
+    await expect(scrollTopButton).toHaveClass(/is-visible/)
+    await scrollTopButton.click()
+    await expect.poll(() => reader.evaluate((element) => element.scrollTop)).toBe(0)
+    await expect(toolbarTypewriter).toHaveText('邮件详情')
+    for (const viewport of [{ width: 375, height: 900 }, { width: 667, height: 375 }]) {
+      await page.setViewportSize(viewport)
+      await reader.evaluate((element) => { element.scrollTop = element.scrollHeight })
+      await expect(toolbarSubject).toBeVisible()
+      await expect(scrollTopButton).toBeVisible()
+      const buttonBox = await scrollTopButton.boundingBox()
+      expect(buttonBox).not.toBeNull()
+      expect((buttonBox?.x ?? 0) + (buttonBox?.width ?? 0) <= viewport.width).toBe(true)
+      expect((buttonBox?.y ?? 0) + (buttonBox?.height ?? 0) <= viewport.height).toBe(true)
+      if (viewport.width === 375) {
+        expect(await toolbarTypewriter.evaluate((element) => (
+          element.scrollWidth > element.clientWidth
+        ))).toBe(true)
+      }
+      expect(await page.evaluate(() => (
+        document.documentElement.scrollWidth <= document.documentElement.clientWidth
+      ))).toBe(true)
+      await scrollTopButton.click()
+      await expect.poll(() => reader.evaluate((element) => element.scrollTop)).toBe(0)
+    }
     await expect.poll(() => proxiedImageSource).toBe(
       'https://assets.vodafone.co.uk/slow.gif',
     )
@@ -108,7 +162,7 @@ test('translates a message and switches back to the original', async ({ page }) 
     localStorage.setItem('omnimail.deployment-guide.v1', 'seen')
     localStorage.setItem('omnimail-locale', 'zh-CN')
   })
-  await page.route('**/api/**', async (route) => {
+  await page.route('**://*/api/**', async (route) => {
     const request = route.request()
     const path = new URL(request.url()).pathname
     if (path === '/api/config') return json(route, {

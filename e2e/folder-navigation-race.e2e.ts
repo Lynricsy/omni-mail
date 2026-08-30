@@ -5,7 +5,7 @@ function json(route: Route, body: unknown) {
   return route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) })
 }
 
-test('an older folder response cannot replace the current inbox', async ({ page }) => {
+test('an older folder request is aborted before it can replace the current inbox', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('omnimail.deployment-guide.v1', 'seen')
     localStorage.setItem('omnimail-locale', 'zh-CN')
@@ -15,7 +15,7 @@ test('an older folder response cannot replace the current inbox', async ({ page 
   let markStarredStarted = () => {}
   const starredHeld = new Promise<void>((resolve) => { releaseStarred = resolve })
   const starredStarted = new Promise<void>((resolve) => { markStarredStarted = resolve })
-  await page.route('**/api/**', async (route) => {
+  await page.route('**://*/api/**', async (route) => {
     const request = route.request()
     const url = new URL(request.url())
     if (url.pathname === '/api/config') return json(route, {
@@ -56,16 +56,16 @@ test('an older folder response cannot replace the current inbox', async ({ page 
   await starredStarted
   await expect(page.getByText('正在读取邮件')).toBeVisible()
 
+  const staleRequestAborted = page.waitForEvent('requestfailed', (request) => {
+    const url = new URL(request.url())
+    return url.pathname === '/api/messages' && url.searchParams.get('folder') === 'starred'
+  })
   await page.getByRole('button', { name: '收件箱' }).click()
+  await staleRequestAborted
   await expect(page.getByRole('heading', { name: '收件箱' })).toBeVisible()
   await expect(page.getByText(message.subject)).toBeVisible()
 
-  const staleResponse = page.waitForResponse((response) => {
-    const url = new URL(response.url())
-    return url.pathname === '/api/messages' && url.searchParams.get('folder') === 'starred'
-  })
   releaseStarred()
-  await staleResponse
   await expect(page.getByText(message.subject)).toBeVisible()
   await expect(page.getByText('Starred only')).toHaveCount(0)
 })

@@ -1,10 +1,10 @@
-import { fetchApi } from './api'
-import { cleanup } from './cleanup'
-import { consumeEmailQueue, receiveEmail } from './mail'
-import type { Env, MailQueueJob } from './types'
+import { fetchApi } from './app/api'
+import { cleanup } from './platform/scheduling/cleanup'
+import { consumeEmailQueue, receiveEmail } from './app/handlers/mail'
+import type { Env, MailQueueJob } from './app/types'
 
-export { OmniMailBackupWorkflow } from './backup'
-export { OmniMailCleanupWorkflow } from './cleanup-workflow'
+export { OmniMailBackupWorkflow } from './features/backups/backup'
+export { OmniMailCleanupWorkflow } from './platform/scheduling/cleanup-workflow'
 
 async function fetchRequest(request: Request, env: Env, context: ExecutionContext): Promise<Response> {
   const path = new URL(request.url).pathname

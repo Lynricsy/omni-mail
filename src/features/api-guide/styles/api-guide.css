@@ -1,0 +1,521 @@
+.api-guide-content {
+  display: grid;
+  width: var(--admin-content-width);
+  gap: 16px;
+  margin-inline: auto;
+}
+
+.api-guide-copy-status {
+  display: flex;
+  width: var(--admin-content-width);
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto 12px;
+  padding: 11px 14px;
+  border: 1px solid color-mix(in srgb, var(--danger) 25%, var(--line));
+  border-radius: 12px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.api-guide-overview,
+.api-guide-section {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.api-guide-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+  gap: 24px;
+  padding: 26px;
+  background:
+    radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--text) 9%, transparent), transparent 20rem),
+    var(--surface);
+}
+
+.api-guide-overview__intro {
+  max-width: 700px;
+}
+
+.api-guide-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 13px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.api-guide-overview h2,
+.api-guide-section__header h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.18;
+}
+
+.api-guide-overview__intro > p,
+.api-guide-section__header > div > p:last-child {
+  max-width: 72ch;
+  margin: 9px 0 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.api-base-url {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: center;
+  gap: 9px 10px;
+  padding: 17px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface-muted) 82%, transparent);
+}
+
+.api-base-url > span {
+  grid-column: 1 / -1;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.api-base-url code,
+.api-authorization-example code,
+.api-tool-grid code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.api-base-url code {
+  align-self: center;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.api-copy-button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.api-copy-button:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.api-token-facts {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.api-token-facts > div {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 13px;
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.api-token-facts dt {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.api-token-facts dd {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.api-guide-section {
+  padding: 24px;
+}
+
+.api-guide-section__header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.api-guide-section__header .eyebrow {
+  margin-bottom: 5px;
+}
+
+.api-step-number {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 13px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.api-code-block {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--background);
+}
+
+.api-code-block > header {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 7px 6px 15px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+}
+
+.api-code-block > header > span {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  overflow-wrap: anywhere;
+  color: var(--text-secondary);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.api-code-block pre {
+  margin: 0;
+  padding: 18px;
+  overflow-x: auto;
+  color: var(--text);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  tab-size: 2;
+}
+
+.api-code-block code {
+  font: inherit;
+}
+
+.api-inline-note,
+.api-cors-note,
+.api-security-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin-top: 13px;
+  padding: 13px 14px;
+  border-radius: 13px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+}
+
+.api-inline-note > svg,
+.api-cors-note > svg,
+.api-security-note > svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.api-inline-note p,
+.api-cors-note p,
+.api-security-note p {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.api-inline-note strong,
+.api-cors-note strong,
+.api-security-note strong {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.api-example-tabs {
+  display: inline-grid;
+  grid-auto-flow: column;
+  gap: 4px;
+  margin-bottom: 10px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.api-example-tabs button {
+  min-width: 92px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+
+.api-example-tabs button:hover {
+  color: var(--text);
+}
+
+.api-example-tabs button[aria-pressed="true"] {
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--text);
+}
+
+.api-authorization-example {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 9px 9px 9px 14px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface);
+}
+
+.api-authorization-example > span {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.api-authorization-example code {
+  font-size: 12px;
+}
+
+.api-tool-grid,
+.api-lifecycle-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.api-tool-grid > article,
+.api-lifecycle-grid > article {
+  min-width: 0;
+  padding: 17px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface-muted);
+}
+
+.api-tool-grid > article > span,
+.api-lifecycle-grid > article > header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.api-tool-grid dl {
+  display: grid;
+  gap: 1px;
+  margin: 13px 0 0;
+}
+
+.api-tool-grid dl > div {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(90px, 0.35fr) minmax(0, 1fr);
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.api-tool-grid dl > div:last-child {
+  border-bottom: 0;
+}
+
+.api-tool-grid dt,
+.api-tool-grid dd {
+  min-width: 0;
+  margin: 0;
+  font-size: 12px;
+}
+
+.api-tool-grid dt {
+  color: var(--text-tertiary);
+}
+
+.api-tool-grid dd {
+  font-weight: 650;
+}
+
+.api-tool-grid ul {
+  display: grid;
+  gap: 9px;
+  margin: 14px 0 0;
+  padding-left: 19px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.api-lifecycle-grid > article {
+  display: grid;
+  align-content: start;
+  gap: 13px;
+}
+
+.api-lifecycle-grid > article > header > span {
+  display: grid;
+}
+
+.api-lifecycle-grid > article > header small {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.api-lifecycle-grid .api-code-block {
+  background: var(--surface);
+}
+
+.api-lifecycle-grid .api-code-block pre {
+  font-size: 11px;
+}
+
+@media (max-width: 900px) {
+  .api-guide-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .api-tool-grid,
+  .api-lifecycle-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .api-guide-workspace .admin-workspace__header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .api-guide-workspace .user-header-actions {
+    width: 100%;
+    grid-column: 1 / -1;
+    margin-top: 2px;
+  }
+
+  .api-guide-workspace .admin-workspace__header.is-stuck {
+    min-height: 64px;
+    background: var(--background);
+  }
+
+  .api-guide-workspace .admin-workspace__header.is-stuck::before {
+    background: color-mix(in srgb, var(--surface) 98%, var(--background));
+  }
+
+  .api-guide-workspace .admin-workspace__header.is-stuck .user-header-actions {
+    display: none;
+  }
+
+  .api-guide-overview,
+  .api-guide-section {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .api-copy-button,
+  .api-example-tabs button {
+    min-height: 44px;
+  }
+
+  .api-code-block pre {
+    padding: 15px;
+    font-size: 11px;
+  }
+
+}
+
+@media (max-width: 520px) {
+  .api-token-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .api-base-url,
+  .api-authorization-example {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .api-base-url .api-copy-button,
+  .api-authorization-example .api-copy-button {
+    width: 100%;
+  }
+
+  .api-authorization-example > span {
+    display: none;
+  }
+
+  .api-example-tabs {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .api-example-tabs button {
+    min-width: 0;
+    padding-inline: 8px;
+  }
+
+  .api-tool-grid dl > div {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .api-copy-button,
+  .api-example-tabs button {
+    transition: none;
+  }
+}

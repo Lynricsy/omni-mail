@@ -4,7 +4,7 @@ test('Linux DO-only registration starts OAuth without showing a password form', 
   let authorizationUrl = ''
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.addInitScript(() => localStorage.setItem('omnimail-locale', 'zh-CN'))
-  await page.route('**/api/**', async (route) => {
+  await page.route('**://*/api/**', async (route) => {
     const request = route.request()
     const url = new URL(request.url())
     if (url.pathname === '/api/config') {
@@ -58,6 +58,6 @@ test('Linux DO-only registration starts OAuth without showing a password form', 
   await dialog.getByRole('button', { name: '通过 Linux DO 创建账户' }).click()
   await expect.poll(() => authorizationUrl).toContain('/api/auth/linux-do')
   expect(new URL(authorizationUrl).searchParams.get('returnTo')).toBe(
-    new URL(page.url()).origin,
+    page.url(),
   )
 })

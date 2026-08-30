@@ -1,0 +1,525 @@
+.mailbox-switcher {
+  position: relative;
+  width: fit-content;
+}
+
+.mailbox-scope-trigger {
+  display: grid;
+  min-width: 155px;
+  min-height: 44px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 0 8px;
+  margin: 0 0 2px -7px;
+  padding: 4px 7px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: background 160ms ease;
+}
+.mailbox-scope-trigger:hover,
+.mailbox-scope-trigger[aria-expanded="true"] {
+  background: var(--surface-hover);
+}
+.mailbox-scope-trigger[aria-expanded="true"] {
+  position: relative;
+  z-index: 90;
+}
+.mailbox-scope-trigger > span {
+  overflow: hidden;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mailbox-scope-trigger > strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mailbox-scope-trigger > svg {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  color: var(--text-tertiary);
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mailbox-scope-trigger[aria-expanded="true"] > svg {
+  transform: rotate(180deg);
+}
+
+.switcher-backdrop {
+  position: fixed;
+  z-index: 70;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: default;
+  opacity: 0;
+  transition: opacity 150ms ease-in;
+}
+.switcher-backdrop.is-open {
+  opacity: 1;
+  transition-timing-function: ease-out;
+}
+.mailbox-switcher__panel {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 8px);
+  left: -7px;
+  display: flex;
+  width: min(420px, calc(100vw - 28px));
+  max-height: min(650px, calc(100dvh - 110px));
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  outline: 0;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px) scale(0.985);
+  transform-origin: top left;
+  transition: opacity 145ms ease-in, transform 170ms ease-in;
+}
+.mailbox-switcher__panel.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+  transition: opacity 170ms ease-out,
+    transform 210ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.switcher-header {
+  display: flex;
+  min-height: 74px;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.switcher-header > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.switcher-header small {
+  display: block;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+
+.switcher-header h2 {
+  margin: 2px 0 0;
+  font-size: 19px;
+  line-height: 1.2;
+}
+
+.mailbox-scope-list,
+.mailbox-manager {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.mailbox-scope-list {
+  padding: 10px;
+}
+
+.mailbox-scope-list button {
+  display: grid;
+  width: 100%;
+  min-height: 60px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: background 160ms ease;
+}
+
+.mailbox-scope-list button:hover {
+  background: var(--surface-muted);
+}
+
+.mailbox-scope-list button.is-selected {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.mailbox-scope-list button > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+}
+
+.mailbox-scope-list button strong,
+.mailbox-scope-list button small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mailbox-scope-list button strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mailbox-scope-list button small {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.mailbox-scope-list button.is-selected small {
+  color: color-mix(in srgb, var(--accent-contrast) 65%, transparent);
+}
+
+.scope-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+
+.is-selected .scope-icon {
+  border-color: color-mix(in srgb, var(--accent-contrast) 22%, transparent);
+  background: color-mix(in srgb, var(--accent-contrast) 11%, transparent);
+  color: inherit;
+}
+
+.mailbox-domain-group {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid var(--line);
+}
+
+.mailbox-address-list {
+  display: grid;
+  gap: 3px;
+  margin: 2px 0 6px 17px;
+  padding-left: 15px;
+  border-left: 1px solid var(--line);
+}
+
+.mailbox-address-list button {
+  min-height: 48px;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: 8px;
+  padding-block: 6px;
+}
+
+.mailbox-address-list button > span {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mailbox-address-list button > small {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--surface-hover);
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.mailbox-address-list button.is-selected > small {
+  background: color-mix(in srgb, var(--accent-contrast) 9%, transparent);
+  color: color-mix(in srgb, var(--accent-contrast) 82%, transparent);
+}
+
+.switcher-footer {
+  padding: 9px 10px;
+  border-top: 1px solid var(--line);
+}
+
+.switcher-footer button {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  gap: 9px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.switcher-footer button:hover {
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.mailbox-manager {
+  padding: 14px;
+}
+
+.mailbox-add-form > label {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mailbox-add-form > div {
+  display: grid;
+  min-height: 46px;
+  grid-template-columns: auto minmax(70px, 1fr) auto minmax(120px, 1.3fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 4px 4px 11px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-muted);
+  color: var(--text-tertiary);
+}
+
+.mailbox-add-form > div:focus-within {
+  border-color: var(--line-strong);
+  background: var(--surface);
+}
+
+.mailbox-add-form input {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.mailbox-domain-separator {
+  color: var(--text-tertiary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mailbox-domain-select {
+  width: 100%;
+  min-width: 0;
+}
+
+.mailbox-domain-select__trigger {
+  display: flex;
+  width: 100%;
+  height: 36px;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
+  padding: 0 9px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.mailbox-domain-select__trigger > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mailbox-domain-select__trigger > svg {
+  flex: none;
+  color: var(--text-tertiary);
+  transition: transform 160ms ease;
+}
+
+.mailbox-domain-select__trigger:hover:not(:disabled),
+.mailbox-domain-select__trigger:focus-visible,
+.mailbox-domain-select.is-open .mailbox-domain-select__trigger {
+  border-color: var(--line-strong);
+  background: var(--surface);
+}
+
+.mailbox-domain-select.is-open .mailbox-domain-select__trigger > svg {
+  transform: rotate(180deg);
+}
+
+.mailbox-domain-select__trigger:disabled {
+  cursor: not-allowed;
+  color: var(--text-tertiary);
+}
+
+.mailbox-domain-select__menu {
+  position: fixed;
+  z-index: 190;
+  display: grid;
+  gap: 3px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: 11px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  scrollbar-width: thin;
+}
+
+.mailbox-domain-select__menu[data-placement="above"] {
+  transform: translateY(-100%);
+}
+
+.mailbox-domain-select__menu > button {
+  display: grid;
+  width: 100%;
+  min-height: 36px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 8px;
+  outline: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.mailbox-domain-select__menu > button:hover,
+.mailbox-domain-select__menu > button:focus-visible,
+.mailbox-domain-select__menu > button.is-selected {
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.mailbox-domain-select__menu > button > svg {
+  color: var(--text-tertiary);
+}
+
+.mailbox-domain-select__menu > button > svg:last-child {
+  color: var(--success);
+}
+
+.mailbox-domain-select__menu > button > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mailbox-manager-note {
+  margin: 9px 2px 0;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.managed-mailboxes {
+  display: grid;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.managed-mailbox {
+  display: grid;
+  min-height: 60px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 9px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.managed-mailbox > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+}
+
+.managed-mailbox > span.is-active {
+  background: var(--success);
+  box-shadow: 0 0 0 3px var(--success-soft);
+}
+
+.managed-mailbox__details {
+  display: grid;
+  min-width: 0;
+}
+
+.managed-mailbox strong,
+.managed-mailbox small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.managed-mailbox strong {
+  font-size: 13px;
+}
+
+.managed-mailbox small {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.mailbox-hint {
+  display: inline-flex;
+  width: fit-content;
+  max-width: calc(100% - 35px);
+  align-items: center;
+  gap: 3px;
+  overflow: hidden;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mailbox-hint svg {
+  flex: 0 0 auto;
+}
